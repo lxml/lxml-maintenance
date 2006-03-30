@@ -929,18 +929,10 @@ cdef class _Attrib(_NodeBase):
         c_node = <xmlNode*>(self._c_node.properties)
         while c_node is not NULL:
             if c_node.type == tree.XML_ATTRIBUTE_NODE:
-                result.append(self._getValue(c_node))
+                python.PyList_Append(
+                    result, _attributeValue(self._c_node, c_node))
             c_node = c_node.next
         return result
-
-    cdef object _getValue(self, xmlNode* c_node):
-        cdef char* value
-        if c_node.ns is NULL or c_node.ns.href is NULL:
-            value = tree.xmlGetNoNsProp(self._c_node, c_node.name)
-        else:
-            value = tree.xmlGetNsProp(
-                self._c_node, c_node.name, c_node.ns.href)
-        return funicode(value)
     
     def items(self):
         result = []
@@ -948,9 +940,9 @@ cdef class _Attrib(_NodeBase):
         c_node = <xmlNode*>(self._c_node.properties)
         while c_node is not NULL:
             if c_node.type == tree.XML_ATTRIBUTE_NODE:
-                result.append((
+                python.PyList_Append(result, (
                     _namespacedName(c_node),
-                    self._getValue(c_node)
+                    _attributeValue(self._c_node, c_node)
                     ))
             c_node = c_node.next
         return result
@@ -1343,6 +1335,15 @@ cdef void _destroyFakeDoc(xmlDoc* c_base_doc, xmlDoc* c_doc):
         # prevent recursive removal of children
         c_root.children = c_root.last = c_root._private = NULL
         tree.xmlFreeDoc(c_doc)
+
+cdef object _attributeValue(xmlNode* c_element, xmlNode* c_attrib_node):
+    cdef char* value
+    if c_attrib_node.ns is NULL or c_attrib_node.ns.href is NULL:
+        value = tree.xmlGetNoNsProp(c_element, c_attrib_node.name)
+    else:
+        value = tree.xmlGetNsProp(c_element, c_attrib_node.name,
+                                  c_attrib_node.ns.href)
+    return funicode(value)
 
 
 cdef _dumpToFile(f, xmlDoc* c_doc, xmlNode* c_node):
