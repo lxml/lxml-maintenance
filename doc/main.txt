@@ -107,6 +107,8 @@ Questions? Suggestions? Code to contribute? We have a `mailing list`_.
 Download
 --------
 
+.. _`lxml at the Python cheeseshop`: http://cheeseshop.python.org/pypi/lxml/
+
 * `lxml 0.9.1`_ (2006-03-30)
 
 * `lxml 0.9`_ (2006-03-20)
@@ -120,6 +122,10 @@ Download
 * `lxml 0.5.1`_ (2005-04-09)
 
 * `lxml 0.5`_ (2005-04-08)
+
+Instead of downloading the source here, you can also find `lxml at the
+Python cheeseshop`_ in source, egg and installer form for various
+platforms.
 
 See also the `installation instructions`_.
 
