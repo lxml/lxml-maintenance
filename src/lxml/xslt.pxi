@@ -361,7 +361,8 @@ cdef class _XSLTResultTree(_ElementTree):
             raise XSLTSaveError, "Error saving XSLT result to string"
         if s is NULL:
             return ''
-        result = funicode(s)
+        # we must not use 'funicode' here as this is not always UTF-8
+        result = python.PyString_FromStringAndSize(s, l)
         tree.xmlFree(s)
         return result
 
