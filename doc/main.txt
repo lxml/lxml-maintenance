@@ -42,33 +42,20 @@ Please take a look at the `installation instructions`_!
 * `lxml 0.5`_,   released 2005-04-08
 
 .. _`lxml 0.9.2`: lxml-0.9.2.tgz
-
 .. _`lxml 0.9.1`: lxml-0.9.1.tgz
-
 .. _`lxml 0.9`: lxml-0.9.tgz
-
 .. _`lxml 0.8`: lxml-0.8.tgz
-
 .. _`lxml 0.7`: lxml-0.7.tgz
-
 .. _`lxml 0.6`: lxml-0.6.tgz
-
 .. _`lxml 0.5.1`: lxml-0.5.1.tgz
-
 .. _`lxml 0.5`: lxml-0.5.tgz
 
 .. _`CHANGES for 0.9.2`: changes-0.9.2.html
-
 .. _`CHANGES for 0.9.1`: changes-0.9.1.html
-
 .. _`CHANGES for 0.9`: changes-0.9.html
-
 .. _`CHANGES for 0.8`: changes-0.8.html
-
 .. _`CHANGES for 0.7`: changes-0.7.html
-
 .. _`CHANGES for 0.6`: changes-0.6.html
-
 .. _`CHANGES for 0.5.1`: changes-0.5.1.html
 
 It's also possible to check out the latest development version of lxml
@@ -104,25 +91,15 @@ lxml also offers a `SAX compliant API`_, that works with the SAX support
 in the standar dlibrary.
 
 .. _`ElementTree API`: http://effbot.org/zone/element-index.htm
-
 .. _`ElementTree compatibility overview`: compatibility.html
-
 .. _`extends this API`: api.html
-
 .. _`extension functions`: extensions.html
-
 .. _XPath: http://www.w3.org/TR/xpath
-
 .. _`Relax NG`: http://www.relaxng.org/
-
 .. _`XML Schema`: http://www.w3.org/XML/Schema
-
 .. _`XSLT`: http://www.w3.org/TR/xslt
-
 .. _`c14n`: http://www.w3.org/TR/2001/REC-xml-c14n-20010315
-
 .. _`implementing namespaces`: namespace_extensions.html
-
 .. _`SAX compliant API`: sax.html
 
 Mailing list
