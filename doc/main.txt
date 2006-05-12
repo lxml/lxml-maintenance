@@ -16,37 +16,21 @@ the introduction_ for more information about background and goals.
 News
 ----
 
-* 2006-05-10: `lxml 0.9.2`_ released (`changes for 0.9.2`_)
+* 2006-05-10: lxml 0.9.2 released (`changes for 0.9.2`_)
 
-* 2006-03-30: `lxml 0.9.1`_ released (`changes for 0.9.1`_)
+* 2006-03-30: lxml 0.9.1 released (`changes for 0.9.1`_)
 
-* 2006-03-20: `lxml 0.9`_ released (`changes for 0.9`_)
+* 2006-03-20: lxml 0.9 released (`changes for 0.9`_)
 
-* 2005-11-03: `lxml 0.8`_ released (`changes for 0.8`_)
+* 2005-11-03: lxml 0.8 released (`changes for 0.8`_)
 
-* 2005-06-15: `lxml 0.7`_ released (`changes for 0.7`_)
+* 2005-06-15: lxml 0.7 released (`changes for 0.7`_)
 
-* 2005-05-14: `lxml 0.6`_ released (`changes for 0.6`_)
+* 2005-05-14: lxml 0.6 released (`changes for 0.6`_)
 
-* 2005-04-09: `lxml 0.5.1`_ released (`changes for 0.5.1`_)
+* 2005-04-09: lxml 0.5.1 released (`changes for 0.5.1`_)
 
-* 2005-04-08: `lxml 0.5`_ released!
-
-.. _`lxml 0.9.2`: lxml-0.9.2.tgz
-
-.. _`lxml 0.9.1`: lxml-0.9.1.tgz
-
-.. _`lxml 0.9`: lxml-0.9.tgz
-
-.. _`lxml 0.8`: lxml-0.8.tgz
-
-.. _`lxml 0.7`: lxml-0.7.tgz
-
-.. _`lxml 0.6`: lxml-0.6.tgz
-
-.. _`lxml 0.5.1`: lxml-0.5.1.tgz
-
-.. _`lxml 0.5`: lxml-0.5.tgz
+* 2005-04-08: lxml 0.5 released!
 
 .. _`CHANGES for 0.9.2`: changes-0.9.2.html
 
@@ -113,7 +97,14 @@ Questions? Suggestions? Code to contribute? We have a `mailing list`_.
 Download
 --------
 
+The best way to download binary versions is to visit `lxml at the Python
+cheeseshop`_.  It has the source, eggs and installers for various platforms.
+
 .. _`lxml at the Python cheeseshop`: http://cheeseshop.python.org/pypi/lxml/
+
+Please take a look at the `installation instructions`_!
+
+.. _`installation instructions`: installation.html
 
 * `lxml 0.9.2`_ (2006-05-10)
 
@@ -131,13 +122,21 @@ Download
 
 * `lxml 0.5`_ (2005-04-08)
 
-Instead of downloading the source here, you can also find `lxml at the
-Python cheeseshop`_ in source, egg and installer form for various
-platforms.
+.. _`lxml 0.9.2`: lxml-0.9.2.tgz
 
-See also the `installation instructions`_.
+.. _`lxml 0.9.1`: lxml-0.9.1.tgz
 
-.. _`installation instructions`: installation.html
+.. _`lxml 0.9`: lxml-0.9.tgz
+
+.. _`lxml 0.8`: lxml-0.8.tgz
+
+.. _`lxml 0.7`: lxml-0.7.tgz
+
+.. _`lxml 0.6`: lxml-0.6.tgz
+
+.. _`lxml 0.5.1`: lxml-0.5.1.tgz
+
+.. _`lxml 0.5`: lxml-0.5.tgz
 
 It's also possible to check out the latest development version of lxml
 from svn directly, using a command like this::
