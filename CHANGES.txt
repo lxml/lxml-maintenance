@@ -1,6 +1,18 @@
 lxml changelog
 ==============
 
+current
+=======
+
+Features added
+--------------
+
+Bugs fixed
+----------
+
+* Element/SubElement failed to set attribute namespaces from passed ``attrib``
+  dictionary
+
 0.9.2 (2006-05-10)
 ==================
 

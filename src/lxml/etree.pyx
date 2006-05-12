@@ -763,9 +763,10 @@ cdef class _Element(_NodeBase):
         ns_utf, name_utf = _getNsTag(_tag)
         doc = self._doc
         c_doc = doc._c_doc
-        c_node = _createElement(c_doc, name_utf, attrib, _extra)
+        c_node = _createElement(c_doc, name_utf)
         # add namespaces to node if necessary
         doc._setNodeNamespaces(c_node, ns_utf, nsmap)
+        _initNodeAttributes(c_node, doc, attrib, _extra)
         return _elementFactory(doc, c_node)
 
     def find(self, path):
@@ -1114,26 +1115,35 @@ cdef class ElementTagFilter:
                 return tree.strcmp(c_node.ns.href, self._href) == 0
         return 0
 
-cdef xmlNode* _createElement(xmlDoc* c_doc, object name_utf,
-                             object attrib, object extra) except NULL:
+cdef xmlNode* _createElement(xmlDoc* c_doc, object name_utf) except NULL:
     cdef xmlNode* c_node
-    if extra:
-        if attrib is None:
-            attrib = extra
-        else:
-            attrib.update(extra)
     c_node = tree.xmlNewDocNode(c_doc, NULL, name_utf, NULL)
-    if attrib:
-        for name, value in attrib.items():
-            attr_name_utf = _utf8(name)
-            value_utf = _utf8(value)
-            tree.xmlNewProp(c_node, attr_name_utf, value_utf)
     return c_node
 
 cdef xmlNode* _createComment(xmlDoc* c_doc, char* text):
     cdef xmlNode* c_node
     c_node = tree.xmlNewDocComment(c_doc, text)
     return c_node
+
+cdef _initNodeAttributes(xmlNode* c_node, _Document doc, attrib, extra):
+    cdef xmlNs* c_ns
+    # 'extra' is not checked here (expected to be a keyword dict)
+    if attrib is not None and not hasattr(attrib, 'items'):
+        raise TypeError, "Invalid attribute dictionary: %s" % type(attrib)
+    if extra:
+        if attrib is None:
+            attrib = extra
+        else:
+            attrib.update(extra)
+    if attrib:
+        for name, value in attrib.items():
+            attr_ns_utf, attr_name_utf = _getNsTag(name)
+            value_utf = _utf8(value)
+            if attr_ns_utf is None:
+                tree.xmlNewProp(c_node, attr_name_utf, value_utf)
+            else:
+                c_ns = doc._findOrBuildNodeNs(c_node, attr_ns_utf)
+                tree.xmlNewNsProp(c_node, c_ns, attr_name_utf, value_utf)
 
 
 # module-level API for ElementTree
@@ -1144,11 +1154,12 @@ def Element(_tag, attrib=None, nsmap=None, **_extra):
     cdef _Document doc
     ns_utf, name_utf = _getNsTag(_tag)
     c_doc = theParser.newDoc()
-    c_node = _createElement(c_doc, name_utf, attrib, _extra)
+    c_node = _createElement(c_doc, name_utf)
     tree.xmlDocSetRootElement(c_doc, c_node)
     doc = _documentFactory(c_doc)
     # add namespaces to node if necessary
     doc._setNodeNamespaces(c_node, ns_utf, nsmap)
+    _initNodeAttributes(c_node, doc, attrib, _extra)
     return _elementFactory(doc, c_node)
 
 def Comment(text=None):
@@ -1169,10 +1180,11 @@ def SubElement(_Element _parent, _tag, attrib=None, nsmap=None, **_extra):
     _raiseIfNone(_parent)
     ns_utf, name_utf = _getNsTag(_tag)
     doc = _parent._doc
-    c_node = _createElement(doc._c_doc, name_utf, attrib, _extra)
+    c_node = _createElement(doc._c_doc, name_utf)
     tree.xmlAddChild(_parent._c_node, c_node)
     # add namespaces to node if necessary
     doc._setNodeNamespaces(c_node, ns_utf, nsmap)
+    _initNodeAttributes(c_node, doc, attrib, _extra)
     return _elementFactory(doc, c_node)
 
 def ElementTree(_Element element=None, file=None, parser=None):
