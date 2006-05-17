@@ -10,6 +10,8 @@ Features added
 Bugs fixed
 ----------
 
+* Some API functions didn't handle invalid None arguments correctly
+
 * Element/SubElement failed to set attribute namespaces from passed ``attrib``
   dictionary
 
