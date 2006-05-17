@@ -1300,7 +1300,7 @@ theParser = Parser()
 
 
 # Private helper functions
-cdef void _raiseIfNone(el):
+cdef _raiseIfNone(el):
     if el is None:
         raise TypeError, "Argument must not be None."
 
