@@ -573,6 +573,82 @@ class ETreeXSLTTestCase(HelperTestCase):
         result = xslt(root[0])
         root[:] = result.getroot()[:]
         del root # segfaulted before
+        
+    def test_xslt_pi(self):
+        tree = self.parse('''\
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="%s"?>
+<a>
+  <b>B</b>
+  <c>C</c>
+</a>''' % fileInTestDir("test1.xslt"))
+
+        style_root = tree.getroot().getprevious().parseXSL().getroot()
+        self.assertEquals("{http://www.w3.org/1999/XSL/Transform}stylesheet",
+                          style_root.tag)
+        
+    def test_xslt_pi_embedded_xmlid(self):
+        # test xml:id dictionary lookup mechanism
+        tree = self.parse('''\
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="#style"?>
+<a>
+  <b>B</b>
+  <c>C</c>
+  <xsl:stylesheet version="1.0" xml:id="style"
+      xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:template match="*" />
+    <xsl:template match="/">
+      <foo><xsl:value-of select="/a/b/text()" /></foo>
+    </xsl:template>
+  </xsl:stylesheet>
+</a>''')
+
+        style_root = tree.getroot().getprevious().parseXSL().getroot()
+        self.assertEquals("{http://www.w3.org/1999/XSL/Transform}stylesheet",
+                          style_root.tag)
+
+        st = etree.XSLT(style_root)
+        res = st.apply(tree)
+        self.assertEquals('''\
+<?xml version="1.0"?>
+<foo>B</foo>
+''',
+                          st.tostring(res))
+        
+    def test_xslt_pi_embedded_id(self):
+        # test XPath lookup mechanism
+        tree = self.parse('''\
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="#style"?>
+<a>
+  <b>B</b>
+  <c>C</c>
+</a>''')
+
+        style = self.parse('''\
+<xsl:stylesheet version="1.0" xml:id="style"
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <xsl:template match="*" />
+  <xsl:template match="/">
+    <foo><xsl:value-of select="/a/b/text()" /></foo>
+  </xsl:template>
+</xsl:stylesheet>
+''')
+
+        tree.getroot().append(style.getroot())
+
+        style_root = tree.getroot().getprevious().parseXSL().getroot()
+        self.assertEquals("{http://www.w3.org/1999/XSL/Transform}stylesheet",
+                          style_root.tag)
+
+        st = etree.XSLT(style_root)
+        res = st.apply(tree)
+        self.assertEquals('''\
+<?xml version="1.0"?>
+<foo>B</foo>
+''',
+                          st.tostring(res))
 
     def test_exslt_regexp_test(self):
         xslt = etree.XSLT(etree.XML("""\

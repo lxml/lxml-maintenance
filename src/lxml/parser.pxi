@@ -865,7 +865,6 @@ cdef void _bugFixURL(xmlDoc* c_source_doc, xmlDoc* c_target_doc):
 ############################################################
 
 cdef _Document _parseDocument(source, _BaseParser parser):
-    cdef xmlDoc* c_doc
     filename = _getFilenameForFile(source)
     if hasattr(source, 'getvalue') and hasattr(source, 'tell'):
         # StringIO - reading from start?
@@ -882,7 +881,11 @@ cdef _Document _parseDocument(source, _BaseParser parser):
     if filename is None:
         filename = _encodeFilename(source)
     # open filename
-    c_doc = _parseDocFromFile(filename, parser)
+    return _parseDocumentFromURL(filename, parser)
+
+cdef _Document _parseDocumentFromURL(url, _BaseParser parser):
+    cdef xmlDoc* c_doc
+    c_doc = _parseDocFromFile(url, parser)
     return _documentFactory(c_doc, parser)
 
 cdef _Document _parseMemoryDocument(text, url, _BaseParser parser):
