@@ -8,12 +8,19 @@ current
 Features added
 --------------
 
+* New C-API function makeElement() to create new elements with text,
+  tail, attributes and namespaces
+
 * Reuse original parser flags for XInclude
 
 * Simplified support for handling XSLT processing instructions
 
 Bugs fixed
 ----------
+
+* Memory leak for external URLs in _XSLTProcessingInstruction.parseXSL()
+
+* Memory leak when garbage collecting tailed root elements
 
 * HTML script/style content was not propagated to .text
 
