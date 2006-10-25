@@ -47,7 +47,7 @@ cdef class _IDDict:
 
     The dictionary must be instantiated with the root element of a parsed XML
     document, otherwise the behaviour is undefined.  Elements and XML trees
-    that were created or modified through the API are not supported.
+    that were created or modified 'by hand' are not supported.
     """
     cdef _Document _doc
     cdef object _keys
@@ -89,7 +89,7 @@ cdef class _IDDict:
         return c_id is not NULL
 
     def has_key(self, id_name):
-        return self.__contains__(id_name)
+        return id_name in self
 
     def __cmp__(self, other):
         if other is None:
@@ -113,27 +113,45 @@ cdef class _IDDict:
         return repr(dict(self))
 
     def keys(self):
-        keys = self._keys
-        if keys is not None:
-            return python.PySequence_List(keys)
-        keys = self._build_keys()
-        self._keys = python.PySequence_Tuple(keys)
-        return keys
+        if self._keys is None:
+            self._keys = self._build_keys()
+        return self._keys[:]
 
     def __iter__(self):
-        keys = self._keys
-        if keys is None:
-            keys = self.keys()
-        return iter(keys)
+        if self._keys is None:
+            self._keys = self._build_keys()
+        return iter(self._keys)
 
     def iterkeys(self):
-        return self.__iter__()
+        return self
 
     def __len__(self):
-        keys = self._keys
-        if keys is None:
-            keys = self.keys()
-        return len(keys)
+        if self._keys is None:
+            self._keys = self._build_keys()
+        return len(self._keys)
+
+    def items(self):
+        if self._items is None:
+            self._items = self._build_items()
+        return self._items[:]
+
+    def iteritems(self):
+        if self._items is None:
+            self._items = self._build_items()
+        return iter(self._items)
+
+    def values(self):
+        if self._items is None:
+            self._items = self._build_items()
+        values = []
+        for item in self._items:
+            value = python.PyTuple_GET_ITEM(item, 1)
+            python.Py_INCREF(value)
+            python.PyList_Append(values, value)
+        return values
+
+    def itervalues(self):
+        return iter(self.values())
 
     cdef object _build_keys(self):
         keys = []
@@ -141,39 +159,12 @@ cdef class _IDDict:
                          _collectIdHashKeys, <python.PyObject*>keys)
         return keys
 
-    def items(self):
-        items = self._items
-        if items is not None:
-            return python.PySequence_List(items)
-        items = self._build_items()
-        self._items = python.PySequence_Tuple(items)
-        return items
-
-    def iteritems(self):
-        items = self._items
-        if items is None:
-            items = self.items()
-        return iter(items)
-
     cdef object _build_items(self):
         items = []
         context = (items, self._doc)
         tree.xmlHashScan(<tree.xmlHashTable*>self._doc._c_doc.ids,
                          _collectIdHashItemList, <python.PyObject*>context)
         return items
-
-    def values(self):
-        items = self._items
-        if items is None:
-            items = self.items()
-        values = []
-        for item in items:
-            value = python.PyTuple_GET_ITEM(item, 1)
-            python.PyList_Append(values, value)
-        return values
-
-    def itervalues(self):
-        return iter(self.values())
 
 cdef void _collectIdHashItemDict(void* payload, void* context, char* name):
     # collect elements from ID attribute hash table
