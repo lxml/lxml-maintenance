@@ -35,14 +35,16 @@ class IOTestCaseBase(unittest.TestCase):
     def test_module_parse_gzipobject(self):
         # (c)ElementTree supports gzip instance as parse argument
         filename = tempfile.mktemp(suffix=".xml.gz")
-        gzip.open(filename, 'wb').write(self.root_str)
+        f = gzip.open(filename, 'wb')
+        f.write(self.root_str)
+        f.close()
         try:
             f_gz = gzip.open(filename, 'r')
             tree = self.etree.parse(f_gz)
+            f_gz.close()
             self.assertEqual(self.etree.tostring(tree.getroot()), self.root_str)
         finally:
             os.remove(filename)
-
 
     def test_class_parse_filename(self):
         # (c)ElementTree class ElementTree has a 'parse' method that returns
@@ -51,7 +53,7 @@ class IOTestCaseBase(unittest.TestCase):
         # parse from filename
         
         filename = tempfile.mktemp(suffix=".xml")
-        open(filename, 'wb').write(self.root_str)
+        os.write(handle, self.root_str)
         try:
             tree = self.etree.ElementTree()
             root = tree.parse(filename)
@@ -61,7 +63,7 @@ class IOTestCaseBase(unittest.TestCase):
 
     def test_class_parse_filename_remove_previous(self):
         filename = tempfile.mktemp(suffix=".xml")
-        open(filename, "wb").write(self.root_str)
+        os.write(handle, self.root_str)
         try:
             tree = self.etree.ElementTree()
             root = tree.parse(filename)
@@ -86,11 +88,12 @@ class IOTestCaseBase(unittest.TestCase):
         # parse from file object
         
         filename = tempfile.mktemp(suffix=".xml")
-        open(filename, 'wb').write(self.root_str)
+        os.write(handle, self.root_str)
         try:
             f = open(filename, 'r')
             tree = self.etree.ElementTree()
             root = tree.parse(f)
+            f.close()
             self.assertEqual(self.etree.tostring(root), self.root_str)
         finally:
             os.remove(filename)
