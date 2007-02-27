@@ -289,7 +289,13 @@ cdef class ObjectifiedElement(ElementBase):
         cdef tree.xmlNode* c_parent
         cdef tree.xmlNode* c_node
         if python._isString(key):
-            self.__setattr__(key, value)
+            key = _buildChildTag(self, key)
+            try:
+                element = _lookupChild(self, key)
+            except AttributeError:
+                _appendValue(self, key, value)
+            else:
+                _replaceElement(element, value)
             return
 
         c_self_node = self._c_node
@@ -493,7 +499,7 @@ cdef class ObjectifiedDataElement(ObjectifiedElement):
     def __repr__(self):
         return textOf(self._c_node) or ''
 
-    def __setText(self, s):
+    def _setText(self, s):
         """For use in subclasses only. Don't use unless you know what you are
         doing.
         """
@@ -1130,7 +1136,7 @@ cdef class ObjectPath:
 
 cdef object __MATCH_PATH_SEGMENT
 __MATCH_PATH_SEGMENT = re.compile(
-    r"(\.?)\s*(?:\{([^}]*)\})?\s*(\w+)\s*(?:\[\s*([-0-9]+)\s*\])?",
+    r"(\.?)\s*(?:\{([^}]*)\})?\s*([^.{}\[\]\s]+)\s*(?:\[\s*([-0-9]+)\s*\])?",
     re.U).match
 
 cdef _parseObjectPathString(path):
