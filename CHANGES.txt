@@ -12,6 +12,8 @@ Features added
 Bugs fixed
 ----------
 
+* Build fixes for MS compiler
+
 * Item assignments to special names like ``element["text"]`` failed
 
 * Renamed ObjectifiedDataElement.__setText() to _setText() to make it easier
