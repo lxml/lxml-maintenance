@@ -29,7 +29,7 @@ Please take a look at the `installation instructions`_!
 
 .. _`installation instructions`: installation.html
 
-* `lxml 1.2.1`_, released 2007-02-20 (`changes for 1.2.1`_)
+* `lxml 1.2.1`_, released 2007-02-27 (`changes for 1.2.1`_)
 
 * `lxml 1.2`_, released 2007-02-20 (`changes for 1.2`_)
 
