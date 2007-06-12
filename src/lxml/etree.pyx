@@ -531,6 +531,36 @@ cdef public class _Element [ type LxmlElementType, object LxmlElement ]:
         """
         _appendChild(self, element)
 
+    def addnext(self, _Element element):
+        """Adds the element as a following sibling directly after this
+        element.
+
+        This is normally used to set a processing instruction or comment after
+        the root node of a document.  Note that tail text is automatically
+        discarded when adding at the root level.
+        """
+        if self._c_node.parent != NULL and not _isElement(self._c_node.parent):
+            if element._c_node.type != tree.XML_PI_NODE:
+                if element._c_node.type != tree.XML_COMMENT_NODE:
+                    raise TypeError, "Only processing instructions and comments can be siblings of the root element"
+            element.tail = None
+        _appendSibling(self, element)
+
+    def addprevious(self, _Element element):
+        """Adds the element as a preceding sibling directly before this
+        element.
+
+        This is normally used to set a processing instruction or comment
+        before the root node of a document.  Note that tail text is
+        automatically discarded when adding at the root level.
+        """
+        if self._c_node.parent != NULL and not _isElement(self._c_node.parent):
+            if element._c_node.type != tree.XML_PI_NODE:
+                if element._c_node.type != tree.XML_COMMENT_NODE:
+                    raise TypeError, "Only processing instructions and comments can be siblings of the root element"
+            element.tail = None
+        _prependSibling(self, element)
+
     def extend(self, elements):
         """Extends the current children by the elements in the iterable.
         """
@@ -1094,6 +1124,9 @@ cdef class __ContentOnlyElement(_Element):
         return []
     
     def items(self):
+        return []
+
+    def values(self):
         return []
 
 cdef class _Comment(__ContentOnlyElement):
@@ -1748,6 +1781,8 @@ def ProcessingInstruction(target, text=None):
     c_node = _createPI(c_doc, _cstr(target), _cstr(text))
     tree.xmlAddChild(<xmlNode*>c_doc, c_node)
     return _elementFactory(doc, c_node)
+
+PI = ProcessingInstruction
 
 def SubElement(_Element _parent not None, _tag,
                attrib=None, nsmap=None, **_extra):

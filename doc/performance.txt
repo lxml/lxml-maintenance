@@ -14,7 +14,7 @@ cElementTree library is a fast C-implementation of the original ElementTree.
 .. _ElementTree:  http://effbot.org/zone/element-index.htm
 .. _cElementTree: http://effbot.org/zone/celementtree.htm
 
-The statements made here are backed by the benchmark scripts
+The statements made here are backed by the (micro-)benchmark scripts
 `bench_etree.py`_, `bench_xpath.py`_ and `bench_objectify.py`_ that come with
 the lxml source distribution.  The timings cited below compare lxml 1.3 (with
 libxml2 2.6.26) to the ElementTree and cElementTree versions shipped with
@@ -30,10 +30,22 @@ different XML tree configurations: different tree sizes, with or without
 attributes (-/A), with or without ASCII or unicode text (-/S/U), and either
 against a tree or its serialised form (T/X).  In the result extracts cited
 below, T1 refers to a 3-level tree with many children at the third level, T2
-is swapped around to have many children at the root element, T3 is a deep tree
-with few children at each level and T4 is a small tree, slightly broader than
-deep.  If repetition is involved, this usually means running the benchmark in
-a loop over all children of the tree root.
+is swapped around to have many children below the root element, T3 is a deep
+tree with few children at each level and T4 is a small tree, slightly broader
+than deep.  If repetition is involved, this usually means running the
+benchmark in a loop over all children of the tree root, otherwise, the
+operation is run on the root node (C/R).
+
+As an example, the character code ``(SATR T1)`` states that the benchmark was
+running for tree T1, with plain string text (S) and attributes (A).  It was
+run against the root element (R) in the tree structure of the data (T).
+
+Note that very small operations are repeated in integer loops to make them
+measurable.  It is therefore not always possible to compare the absolute
+timings of, say, a single access benchmark (which usually loops) and a 'get
+all in one step' benchmark, which already takes enough time to be measurable
+and is therefore measured as is.  Take a look at the concrete benchmarks in
+the scripts to understand how the numbers compare.
 
 .. contents::
 .. 
@@ -48,11 +60,11 @@ a loop over all children of the tree root.
 Bad things first
 ----------------
 
-First thing to say: there *is* an overhead involved in having a C library
-mimic the ElementTree API.  As opposed to ElementTree, lxml has to generate
-Python objects on the fly when asked for them.  What this means is: the more
-of your code runs in Python, the slower your application gets.  Note, however,
-that this is true for most performance critical Python applications.
+First thing to say: there *is* an overhead involved in having a DOM-like C
+library mimic the ElementTree API.  As opposed to ElementTree, lxml has to
+generate Python objects on the fly when asked for them.  What this means is:
+the more of your code runs in Python, the slower your application gets.  Note,
+however, that this is true for most performance critical Python applications.
 
 
 Parsing and Serialising
@@ -132,20 +144,20 @@ restructuring.  This can be seen from the tree setup times of the benchmark
 (given in seconds)::
 
   lxe:       --     S-     U-     -A     SA     UA
-       T1: 0.1029 0.1005 0.0998 0.1003 0.0998 0.1002
-       T2: 0.1035 0.1013 0.1015 0.1090 0.1089 0.1090
-       T3: 0.0276 0.0270 0.0273 0.0679 0.0673 0.0673
-       T4: 0.0004 0.0004 0.0004 0.0013 0.0013 0.0013
+       T1: 0.1155 0.1154 0.1153 0.1159 0.1181 0.1158
+       T2: 0.1183 0.1197 0.1200 0.1267 0.1261 0.1264
+       T3: 0.0341 0.0312 0.0314 0.0726 0.0717 0.0720
+       T4: 0.0005 0.0004 0.0004 0.0014 0.0014 0.0014
   cET:       --     S-     U-     -A     SA     UA
-       T1: 0.0277 0.0273 0.0273 0.0272 0.0278 0.0275
-       T2: 0.0281 0.0347 0.0281 0.0285 0.0284 0.0284
-       T3: 0.0074 0.0074 0.0074 0.0122 0.0102 0.0101
+       T1: 0.0290 0.0271 0.0275 0.0297 0.0273 0.0274
+       T2: 0.0280 0.0280 0.0281 0.0285 0.0283 0.0286
+       T3: 0.0071 0.0072 0.0071 0.0113 0.0096 0.0096
        T4: 0.0001 0.0001 0.0001 0.0001 0.0001 0.0001
   ET :       --     S-     U-     -A     SA     UA
-       T1: 0.1349 0.1962 0.2356 0.1288 0.2642 0.1351
-       T2: 0.3104 0.1344 0.3566 0.3857 0.1354 0.4677
-       T3: 0.0313 0.0325 0.0312 0.0356 0.3803 0.0364
-       T4: 0.0005 0.0005 0.0008 0.0006 0.0007 0.0006
+       T1: 0.1362 0.1985 0.2300 0.1344 0.2672 0.1335
+       T2: 0.3107 0.1386 0.3581 0.3886 0.1388 0.4277
+       T3: 0.0334 0.0332 0.0320 0.0367 0.3769 0.0375
+       T4: 0.0006 0.0005 0.0008 0.0007 0.0007 0.0006
 
 While lxml is still faster than ET in most cases (30-60%), cET can be up to
 three times faster than lxml here.  One of the reasons is that lxml must
@@ -160,6 +172,29 @@ lxml has to create a Python object for each child and collect them in a list::
   lxe: root_getchildren          (--TR T2)    0.3500 msec/pass
   cET: root_getchildren          (--TR T2)    0.0150 msec/pass
   ET : root_getchildren          (--TR T2)    0.0091 msec/pass
+
+When accessing single children, however, e.g. by index, this handicap is
+negligible::
+
+  lxe: first_child               (--TR T2)    0.2499 msec/pass
+  cET: first_child               (--TR T2)    0.2048 msec/pass
+  ET : first_child               (--TR T2)    0.9291 msec/pass
+
+  lxe: last_child                (--TR T1)    0.2511 msec/pass
+  cET: last_child                (--TR T1)    0.2148 msec/pass
+  ET : last_child                (--TR T1)    0.9191 msec/pass
+
+... unless you add the time to find a child index in a bigger list, as ET and
+cET use Python lists here, which are based on arrays.  The data structure used
+by libxml2 is a linked tree, and thus, a linked list of children::
+
+  lxe: middle_child              (--TR T1)    0.2921 msec/pass
+  cET: middle_child              (--TR T1)    0.2069 msec/pass
+  ET : middle_child              (--TR T1)    0.9291 msec/pass
+
+  lxe: middle_child              (--TR T2)    1.9028 msec/pass
+  cET: middle_child              (--TR T2)    0.2089 msec/pass
+  ET : middle_child              (--TR T2)    0.9360 msec/pass
 
 As opposed to ET, libxml2 has a notion of documents that each element must be
 in.  This results in a major performance difference for creating independent
