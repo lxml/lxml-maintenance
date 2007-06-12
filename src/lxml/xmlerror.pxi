@@ -128,6 +128,9 @@ cdef class _ListErrorLog(_BaseErrorLog):
         self._entries = entries
 
     def copy(self):
+        """Creates a shallow copy of this error log.  Reuses the list of
+        entries.
+        """
         return _ListErrorLog(self._entries, self.last_error)
 
     def __iter__(self):
@@ -146,6 +149,9 @@ cdef class _ListErrorLog(_BaseErrorLog):
         return len(self._entries)
 
     def filter_domains(self, domains):
+        """Filter the errors by the given domains and return a new error log
+        containing the matches.
+        """
         cdef _LogEntry entry
         filtered = []
         if not python.PySequence_Check(domains):
@@ -156,6 +162,9 @@ cdef class _ListErrorLog(_BaseErrorLog):
         return _ListErrorLog(filtered)
 
     def filter_types(self, types):
+        """Filter the errors by the given types and return a new error log
+        containing the matches.
+        """
         cdef _LogEntry entry
         if not python.PySequence_Check(types):
             types = (types,)
@@ -166,8 +175,9 @@ cdef class _ListErrorLog(_BaseErrorLog):
         return _ListErrorLog(filtered)
 
     def filter_levels(self, levels):
-        """Return a log with all messages of the requested level(s). Takes a
-        single log level or a sequence."""
+        """Filter the errors by the given error levels and return a new error
+        log containing the matches.
+        """
         cdef _LogEntry entry
         if not python.PySequence_Check(levels):
             levels = (levels,)
@@ -213,6 +223,8 @@ cdef class _ErrorLog(_ListErrorLog):
         del self._entries[:]
 
     def copy(self):
+        """Creates a shallow copy of this error log and the list of entries.
+        """
         return _ListErrorLog(self._entries[:], self.last_error)
 
     def __iter__(self):
@@ -260,7 +272,8 @@ cdef class PyErrorLog(_BaseErrorLog):
     object and calls ``self.log(log_entry, format_string, arg1, arg2, ...)``
     with appropriate data.
     """
-    cdef public object level_map
+    cdef readonly object level_map
+    cdef object _map_level
     cdef object _log
     def __init__(self, logger_name=None):
         _BaseErrorLog.__init__(self)
@@ -270,6 +283,7 @@ cdef class PyErrorLog(_BaseErrorLog):
             ErrorLevels.ERROR   : logging.ERROR,
             ErrorLevels.FATAL   : logging.CRITICAL
             }
+        self._map_level = self.level_map.get
         if logger_name:
             logger = logging.getLogger(logger_name)
         else:
@@ -277,11 +291,13 @@ cdef class PyErrorLog(_BaseErrorLog):
         self._log = logger.log
 
     def copy(self):
+        """Dummy method that returns an empty error log.
+        """
         return _ListErrorLog([])
 
     def log(self, entry, message_format_string, *args):
         self._log(
-            self.level_map.get(entry.level, 0),
+            self._map_level(entry.level, 0),
             message_format_string, *args
             )
 
@@ -300,9 +316,8 @@ def useGlobalPythonLog(PyErrorLog log not None):
     """Replace the global error log by an etree.PyErrorLog that uses the
     standard Python logging package.
 
-    Note that this slows down processing and disables access to the global
-    error log from exceptions.  Parsers, XSLT etc. will continue to provide
-    their normal local error log.
+    Note that this disables access to the global error log from exceptions.
+    Parsers, XSLT etc. will continue to provide their normal local error log.
     """
     global __GLOBAL_ERROR_LOG
     __GLOBAL_ERROR_LOG = log
@@ -378,6 +393,11 @@ cdef void _receiveXSLTError(void* c_log_handler, char* msg, ...):
     c_error.domain = xmlerror.XML_FROM_XSLT
     c_error.code   = xmlerror.XML_ERR_OK    # what else?
     c_error.level  = xmlerror.XML_ERR_ERROR # what else?
+    c_error.str1   = NULL
+    c_error.str2   = NULL
+    c_error.str3   = NULL
+    c_error.int1   = 0
+    c_error.int2   = 0
 
     _forwardError(c_log_handler, &c_error)
 
