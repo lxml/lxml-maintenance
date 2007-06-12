@@ -22,6 +22,12 @@ Features added
 Bugs fixed
 ----------
 
+* Replacing the children slice of an Element would cut off the tails of the
+  original children
+
+* API functions now check incoming strings for XML conformity.  Zero bytes or
+  low ASCII characters are no longer accepted.
+
 * XSLT parsing failed to pass resolver context on to imported documents
 
 * More ET compatible behaviour when writing out XML declarations or not
