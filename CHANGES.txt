@@ -8,6 +8,10 @@ Under development
 Features added
 --------------
 
+* Support for custom Element class instantiation in lxml.sax
+
+* '.' represents empty ObjectPath (identity)
+
 * ``Element.values()`` to accompany the existing ``.keys()`` and ``.items()``
 
 Bugs fixed
