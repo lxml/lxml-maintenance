@@ -13,6 +13,8 @@ Features added
 Bugs fixed
 ----------
 
+* Raise AssertionError when passing strings containing '\0' bytes
+
 
 1.3beta (2007-02-27)
 ====================
