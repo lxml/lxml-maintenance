@@ -22,6 +22,8 @@ Features added
 Bugs fixed
 ----------
 
+* XSLT parsing failed to pass resolver context on to imported documents
+
 * More ET compatible behaviour when writing out XML declarations or not
 
 * ``Element.attrib`` was missing ``clear()`` method
