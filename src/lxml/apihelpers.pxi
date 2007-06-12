@@ -436,6 +436,9 @@ cdef int _tagMatches(xmlNode* c_node, char* c_href, char* c_name):
     * its name string equals the c_name string
     """
     cdef char* c_node_href
+    if c_node.type != tree.XML_ELEMENT_NODE:
+        # not an element, only succeed if we match everything
+        return c_name is NULL and c_href is NULL
     if c_name is NULL:
         if c_href is NULL:
             # always match

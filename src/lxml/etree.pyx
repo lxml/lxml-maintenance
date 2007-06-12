@@ -1596,17 +1596,22 @@ ctypedef xmlNode* (*_node_to_node_function)(xmlNode*)
 cdef public class _ElementTagMatcher [ object LxmlElementTagMatcher,
                                        type LxmlElementTagMatcherType ]:
     cdef object _pystrings
+    cdef int _node_type
     cdef char* _href
     cdef char* _name
     cdef _initTagMatch(self, tag):
+        self._href = NULL
+        self._name = NULL
         if tag is None:
-            self._href = NULL
-            self._name = NULL
+            self._node_type = 0
+        elif tag is Comment:
+            self._node_type = tree.XML_COMMENT_NODE
+        elif tag is ProcessingInstruction:
+            self._node_type = tree.XML_PI_NODE
         else:
+            self._node_type = tree.XML_ELEMENT_NODE
             self._pystrings = _getNsTag(tag)
-            if self._pystrings[0] is None:
-                self._href = NULL
-            else:
+            if self._pystrings[0] is not None:
                 self._href = _cstr(self._pystrings[0])
             self._name = _cstr(self._pystrings[1])
             if self._name[0] == c'*' and self._name[1] == c'\0':
@@ -1624,7 +1629,9 @@ cdef public class _ElementIterator(_ElementTagMatcher) [
         cdef xmlNode* c_node
         c_node = self._next_element(node._c_node)
         while c_node is not NULL and \
-                  not _tagMatches(c_node, self._href, self._name):
+                  self._node_type != 0 and \
+                  (self._node_type != c_node.type or
+                   not _tagMatches(c_node, self._href, self._name)):
             c_node = self._next_element(c_node)
         if c_node is NULL:
             self._node = None
@@ -1655,7 +1662,9 @@ cdef class ElementChildIterator(_ElementIterator):
             self._next_element = _nextElement
         if tag is not None:
             while c_node is not NULL and \
-                      not _tagMatches(c_node, self._href, self._name):
+                      self._node_type != 0 and \
+                      (self._node_type != c_node.type or
+                       not _tagMatches(c_node, self._href, self._name)):
                 c_node = self._next_element(c_node)
         if c_node is not NULL:
             # store Python ref:
@@ -1702,9 +1711,11 @@ cdef class ElementDepthFirstIterator(_ElementTagMatcher):
         self._top_node  = node
         self._next_node = node
         self._initTagMatch(tag)
-        if tag is not None and \
-               not _tagMatches(node._c_node, self._href, self._name) or \
-               not inclusive:
+        if not inclusive or \
+               tag is not None and \
+               self._node_type != 0 and \
+               (self._node_type != node._c_node.type or
+                not _tagMatches(node._c_node, self._href, self._name)):
             # this cannot raise StopIteration, self._next_node != None
             self.next()
 
@@ -1727,7 +1738,8 @@ cdef class ElementDepthFirstIterator(_ElementTagMatcher):
 
     cdef xmlNode* _nextNodeAnyTag(self, xmlNode* c_node):
         tree.BEGIN_FOR_EACH_ELEMENT_FROM(self._top_node._c_node, c_node, 0)
-        return c_node
+        if self._node_type == 0 or self._node_type == c_node.type:
+            return c_node
         tree.END_FOR_EACH_ELEMENT_FROM(c_node)
         return NULL
 

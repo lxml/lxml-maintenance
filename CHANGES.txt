@@ -25,6 +25,9 @@ Bugs fixed
 * Replacing the children slice of an Element would cut off the tails of the
   original children
 
+* ``Element.getiterator(tag)`` did not accept ``Comment`` and
+  ``ProcessingInstruction`` as tags
+
 * API functions now check incoming strings for XML conformity.  Zero bytes or
   low ASCII characters are no longer accepted.
 
