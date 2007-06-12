@@ -1,5 +1,5 @@
 from lxml.etree import parse, Element, SubElement, XPath
-import os, shutil, re, sys, copy
+import os, shutil, re, sys, copy, time
 
 SITE_STRUCTURE = [
     ('lxml', ('main.txt', 'intro.txt', 'FAQ.txt', 'compatibility.txt',
@@ -13,6 +13,8 @@ SITE_STRUCTURE = [
 RST2HTML_OPTIONS = " ".join([
     "--no-toc-backlinks",
     "--strip-comments",
+    "--language en",
+    "--date",
     ])
 
 find_title = XPath("/h:html/h:head/h:title/text()",
@@ -21,6 +23,8 @@ find_headings = XPath("//h:h1[not(@class)]/h:a/text()",
                             {"h" : "http://www.w3.org/1999/xhtml"})
 find_menu = XPath("//h:ul[@id=$name]",
                   {"h" : "http://www.w3.org/1999/xhtml"})
+find_page_end = XPath("/h:html/h:body/h:div[last()]",
+                      {"h" : "http://www.w3.org/1999/xhtml"})
 
 replace_invalid = re.compile(r'[-_/.\s\\]').sub
 
