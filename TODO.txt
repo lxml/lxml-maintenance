@@ -17,12 +17,6 @@ In general
 * more testing on multi-threading
 
 
-ElementTree
------------
-
-* _setroot(), even though this is not strictly a public method.
-
-
 QName
 -----
 
