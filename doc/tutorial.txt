@@ -69,7 +69,7 @@ library`_.
 
 
 The Element class
-=================
+-----------------
 
 An ``Element`` is the main container object for the ElementTree API.  Most of
 the XML tree functionality is accessed through this class.  Elements are
