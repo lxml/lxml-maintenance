@@ -13,17 +13,11 @@ a programmer easier.
 
 .. contents::
 .. 
-   1  Elements and ElementTrees
-     1.1  The Element class
-     1.2  The ElementTree class
-   2  Parsing and XML literals
-     2.1  The XML() function
-     2.2  The parse() function
-   3  Namespaces
-   4  The find*() methods
-     4.1  findall()
-     4.2  find()
-     4.3  findtext()
+   1  The Element class
+   2  Elements are lists
+   3  Elements carry attributes
+   4  Elements contain text
+   5  Tree iteration
 
 
 A common way to import ``lxml.etree`` is as follows::
