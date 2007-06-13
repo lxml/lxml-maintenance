@@ -1038,6 +1038,10 @@ if config.ENABLE_THREADING:
 else:
     ELEMENT_CREATION_LOCK = NULL
 
+cdef extern from "etree_defs.h":
+    # macro call to 't->tp_new()' for fast instantiation
+    cdef _Element NEW_ELEMENT "PY_NEW" (object t)
+
 cdef _Element _elementFactory(_Document doc, xmlNode* c_node):
     cdef python.PyThreadState* state
     cdef _Element result
@@ -1056,9 +1060,13 @@ cdef _Element _elementFactory(_Document doc, xmlNode* c_node):
             python.PyThread_release_lock(ELEMENT_CREATION_LOCK)
             return result
 
-    element_class = LOOKUP_ELEMENT_CLASS(ELEMENT_CLASS_LOOKUP_STATE,
-                                         doc, c_node)
-    result = element_class()
+    element_class = LOOKUP_ELEMENT_CLASS(
+        ELEMENT_CLASS_LOOKUP_STATE, doc, c_node)
+    if element_class is _Element:
+        # fast path for standard _Element class
+        result = NEW_ELEMENT(_Element)
+    else:
+        result = element_class()
     result._doc = doc
     result._c_node = c_node
     registerProxy(result)
@@ -1066,7 +1074,8 @@ cdef _Element _elementFactory(_Document doc, xmlNode* c_node):
     if config.ENABLE_THREADING:
         python.PyThread_release_lock(ELEMENT_CREATION_LOCK)
 
-    result._init()
+    if element_class is not _Element:
+        result._init()
     return result
 
 
