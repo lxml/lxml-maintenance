@@ -11,6 +11,9 @@ Features added
 * ``Element.addnext(el)`` and ``Element.addprevious(el)`` methods to support
   adding processing instructions and comments around the root node
 
+* Extended type annotation in objectify: cleaner annotation namespace setup
+  plus new ``xsiannotate()`` and ``deannotate()`` functions
+
 * Element.attrib now has a ``pop()`` method
 
 * Support for custom Element class instantiation in lxml.sax: passing a
