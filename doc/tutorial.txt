@@ -327,35 +327,3 @@ In lxml.etree, elements provide `further iterators`_ for all directions in the
 tree: children, parents (or rather ancestors) and siblings.
 
 .. _`further iterators`: api.html#iteration
-
-
-The ElementTree class
-=====================
-
-An ``ElementTree`` is mainly a wrapper around a tree with a root node.
-
-
-Parsing files and XML literals
-==============================
-
-The XML() function
-------------------
-
-The parse() function
---------------------
-
-Namespaces
-==========
-
-
-ElementPath
-===========
-
-findall()
----------
-
-find()
-------
-
-findtext()
-----------
