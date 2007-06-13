@@ -1591,6 +1591,8 @@ def test_suite():
     suite.addTests(
         [doctest.DocFileSuite('../../../doc/api.txt')])
     suite.addTests(
+        [doctest.DocFileSuite('../../../doc/tutorial.txt')])
+    suite.addTests(
         [doctest.DocFileSuite('../../../doc/parsing.txt')])
     suite.addTests(
         [doctest.DocFileSuite('../../../doc/resolvers.txt')])
