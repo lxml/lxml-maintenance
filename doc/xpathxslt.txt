@@ -274,11 +274,11 @@ calling it, and this results in another ElementTree object::
   >>> doc = etree.parse(f)
   >>> result_tree = transform(doc)
 
-By default, XSLT supports all extension functions from libxslt and libexslt
-as well as Python regular expressions through the `EXSLT regexp functions`_.
+By default, XSLT supports all extension functions from libxslt and libexslt as
+well as Python regular expressions through the `EXSLT regexp functions`_.
 Also see the documentation on `custom extension functions`_ and `document
-resolvers`_. There is a separate section on `controlling access`_ to
-external documents and resources.
+resolvers`_.  There is a separate section on `controlling access`_ to external
+documents and resources.
 
 .. _`EXSLT regexp functions`: http://www.exslt.org/regexp/
 .. _`document resolvers`: resolvers.html

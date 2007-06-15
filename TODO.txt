@@ -1,3 +1,7 @@
+===============
+ToDo's for lxml
+===============
+
 lxml
 ====
 
@@ -11,8 +15,6 @@ In general
 ----------
 
 * test namespaces more in-depth
-
-* will namespace nodes of unknown namespaces be added (and never freed?)
 
 * more testing on multi-threading
 

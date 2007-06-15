@@ -214,7 +214,7 @@ cdef class CustomElementClassLookup(FallbackElementClassLookup):
 
     You can inherit from this class and override the method
 
-        lookup(type, doc, namespace, name)
+        lookup(self, type, doc, namespace, name)
 
     to lookup the element class for a node. Arguments of the method:
     * type:      one of 'element', 'comment', 'PI'
@@ -237,7 +237,9 @@ cdef object _custom_class_lookup(state, _Document doc, xmlNode* c_node):
 
     lookup = <CustomElementClassLookup>state
 
-    if c_node.type == tree.XML_COMMENT_NODE:
+    if c_node.type == tree.XML_ELEMENT_NODE:
+        element_type = "element"
+    elif c_node.type == tree.XML_COMMENT_NODE:
         element_type = "comment"
     elif c_node.type == tree.XML_PI_NODE:
         element_type = "PI"

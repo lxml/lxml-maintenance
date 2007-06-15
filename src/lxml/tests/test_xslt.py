@@ -34,6 +34,9 @@ class ETreeXSLTTestCase(HelperTestCase):
     def test_xslt_elementtree_error(self):
         self.assertRaises(ValueError, etree.XSLT, etree.ElementTree())
 
+    def test_xslt_input_none(self):
+        self.assertRaises(TypeError, etree.XSLT, None)
+
     def test_xslt_utf8(self):
         tree = self.parse(u'<a><b>\uF8D2</b><c>\uF8D2</c></a>')
         style = self.parse('''\

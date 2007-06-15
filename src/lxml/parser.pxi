@@ -5,9 +5,13 @@ cimport htmlparser
 from xmlparser cimport xmlParserCtxt, xmlDict
 
 class XMLSyntaxError(LxmlSyntaxError):
+    """Syntax error while parsing an XML document.
+    """
     pass
 
 class ParserError(LxmlError):
+    """Internal lxml parser error.
+    """
     pass
 
 ctypedef enum LxmlParserType:
@@ -378,7 +382,7 @@ cdef class _BaseParser:
             raise TypeError, "This class cannot be instantiated"
         self._parser_ctxt = pctxt
         if pctxt is NULL:
-            raise ParserError, "Failed to create parser context"
+            python.PyErr_NoMemory()
         if pctxt.sax != NULL:
             # hard switch-off for CDATA nodes => makes them plain text
             pctxt.sax.cdataBlock = NULL
@@ -424,9 +428,6 @@ cdef class _BaseParser:
     property error_log:
         def __get__(self):
             return self._error_log.copy()
-
-    def __dummy(self):
-        pass
 
     def setElementClassLookup(self, ElementClassLookup lookup = None):
         """Set a lookup scheme for element classes generated from this parser.
@@ -597,7 +598,7 @@ cdef int _raiseParseError(xmlParserCtxt* ctxt, filename) except 0:
         raise IOError, message
     elif ctxt.lastError.message is not NULL:
         message = (ctxt.lastError.message).strip()
-        if ctxt.lastError.line >= 0:
+        if ctxt.lastError.line > 0:
             message = "line %d: %s" % (ctxt.lastError.line, message)
         raise XMLSyntaxError, message
     else:
@@ -746,7 +747,15 @@ __DEFAULT_XML_PARSER = XMLParser()
 
 __GLOBAL_PARSER_CONTEXT.setDefaultParser(__DEFAULT_XML_PARSER)
 
-def setDefaultParser(_BaseParser parser=None):
+def setDefaultParser(parser=None):
+    "Deprecated, please use set_default_parser instead."
+    set_default_parser(parser)
+
+def getDefaultParser():
+    "Deprecated, please use get_default_parser instead."
+    return get_default_parser()
+
+def set_default_parser(_BaseParser parser=None):
     """Set a default parser for the current thread.  This parser is used
     globally whenever no parser is supplied to the various parse functions of
     the lxml API.  If this function is called without a parser (or if it is
@@ -760,16 +769,8 @@ def setDefaultParser(_BaseParser parser=None):
         parser = __DEFAULT_XML_PARSER
     __GLOBAL_PARSER_CONTEXT.setDefaultParser(parser)
 
-def getDefaultParser():
-    return __GLOBAL_PARSER_CONTEXT.getDefaultParser()
-
-def set_default_parser(parser):
-    "Deprecated, please use setDefaultParser instead."
-    setDefaultParser(parser)
-
 def get_default_parser():
-    "Deprecated, please use getDefaultParser instead."
-    return getDefaultParser()
+    return __GLOBAL_PARSER_CONTEXT.getDefaultParser()
 
 ############################################################
 ## HTML parser

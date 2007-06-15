@@ -1,9 +1,13 @@
 # module-level API for namespace implementations
 
 class LxmlRegistryError(LxmlError):
+    """Base class of lxml registry errors.
+    """
     pass
 
 class NamespaceRegistryError(LxmlRegistryError):
+    """Error registering a namespace extension.
+    """
     pass
 
 cdef object __NAMESPACE_REGISTRIES
@@ -75,6 +79,11 @@ cdef class _NamespaceRegistry:
             name = _utf8(name)
         return self._get(name)
 
+    def __delitem__(self, name):
+        if name is not None:
+            name = _utf8(name)
+        python.PyDict_DelItem(self._entries, name)
+
     cdef object _get(self, object name):
         cdef python.PyObject* dict_result
         dict_result = python.PyDict_GetItem(self._entries, name)
@@ -99,7 +108,7 @@ cdef class _NamespaceRegistry:
         return self._entries.iteritems()
 
     def clear(self):
-        self._entries.clear()
+        python.PyDict_Clear(self._entries)
 
 cdef class _ClassNamespaceRegistry(_NamespaceRegistry):
     "Dictionary-like registry for namespace implementation classes"

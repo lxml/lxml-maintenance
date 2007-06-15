@@ -1,6 +1,8 @@
-# supports for extension functions in XPath and XSLT
+# support for extension functions in XPath and XSLT
 
 class XPathError(LxmlError):
+    """Base class of all XPath errors.
+    """
     pass
 
 class XPathFunctionError(XPathError):
@@ -207,11 +209,10 @@ cdef class _BaseContext:
             return
         for o in obj:
             if isinstance(o, _Element):
-                element = <_Element>o
                 #print "Holding element:", <int>element._c_node
-                self._temp_refs.add(element)
+                self._temp_refs.add(o)
                 #print "Holding document:", <int>element._doc._c_doc
-                self._temp_refs.add(element._doc)
+                self._temp_refs.add((<_Element>o)._doc)
 
 
 def Extension(module, function_mapping, ns=None):
@@ -405,7 +406,7 @@ cdef void _call_python_xpath_function(xpath.xmlXPathParserContext* ctxt,
             fref = "{%s}%s" % (rctxt.functionURI, rctxt.function)
         else:
             fref = rctxt.function
-        xpath.xmlXPathErr(ctxt, xpath.XML_XPATH_UNKNOWN_FUNC_ERROR)
+        xpath.xmlXPathErr(ctxt, xpath.XPATH_UNKNOWN_FUNC_ERROR)
         exception = XPathFunctionError("XPath function '%s' not found" % fref)
         context._exc._store_exception(exception)
 

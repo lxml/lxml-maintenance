@@ -554,6 +554,15 @@ class ETreeOnlyTestCase(HelperTestCase):
         self.assertEquals('<!--TEXT -->\n<root></root>',
                           self._writeElement(root))
 
+    # ET's Elements have items() and key(), but not values()
+    def test_attribute_values(self):
+        XML = self.etree.XML
+        
+        root = XML('<doc alpha="Alpha" beta="Beta" gamma="Gamma"/>')
+        values = root.values()
+        values.sort()
+        self.assertEquals(['Alpha', 'Beta', 'Gamma'], values)
+
     # gives error in ElementTree
     def test_comment_empty(self):
         Element = self.etree.Element
@@ -1589,9 +1598,9 @@ def test_suite():
     suite.addTests([unittest.makeSuite(ElementIncludeTestCase)])
     suite.addTests([unittest.makeSuite(ETreeC14NTestCase)])
     suite.addTests(
-        [doctest.DocFileSuite('../../../doc/api.txt')])
-    suite.addTests(
         [doctest.DocFileSuite('../../../doc/tutorial.txt')])
+    suite.addTests(
+        [doctest.DocFileSuite('../../../doc/api.txt')])
     suite.addTests(
         [doctest.DocFileSuite('../../../doc/parsing.txt')])
     suite.addTests(

@@ -13,6 +13,7 @@ from common_imports import itemgetter
 
 from lxml import objectify
 
+XML_SCHEMA_NS = "http://www.w3.org/2001/XMLSchema"
 XML_SCHEMA_INSTANCE_NS = "http://www.w3.org/2001/XMLSchema-instance"
 XML_SCHEMA_INSTANCE_TYPE_ATTR = "{%s}type" % XML_SCHEMA_INSTANCE_NS
 XML_SCHEMA_NIL_ATTR = "{%s}nil" % XML_SCHEMA_INSTANCE_NS

@@ -8,6 +8,8 @@ Under development
 Features added
 --------------
 
+* ``parse()`` function in ``objectify``, corresponding to ``XML()`` etc.
+
 * ``Element.addnext(el)`` and ``Element.addprevious(el)`` methods to support
   adding processing instructions and comments around the root node
 

@@ -85,6 +85,9 @@ class Error(Exception):
 
 # module level superclass for all exceptions
 class LxmlError(Error):
+    """Main exception base class for lxml.  All other exceptions inherit from
+    this one.
+    """
     def __init__(self, *args):
         _initError(self, *args)
         self.error_log = __copyGlobalErrorLog()
@@ -106,15 +109,18 @@ del _superError
 
 # superclass for all syntax errors
 class LxmlSyntaxError(LxmlError, SyntaxError):
-    pass
-
-class DocumentInvalid(LxmlError):
+    """Base class for all syntax errors.
+    """
     pass
 
 class XIncludeError(LxmlError):
+    """Error during XInclude processing.
+    """
     pass
 
 class C14NError(LxmlError):
+    """Error during C14N serialisation.
+    """
     pass
 
 # version information
@@ -349,7 +355,7 @@ cdef public class _Document [ type LxmlDocumentType, object LxmlDocument ]:
         for prefix, href in nsmap.items():
             href_utf = _utf8(href)
             c_href = _cstr(href_utf)
-            if prefix is not None:
+            if prefix is not None and prefix:
                 prefix_utf = _utf8(prefix)
                 c_prefix = _cstr(prefix_utf)
             else:
@@ -747,8 +753,8 @@ cdef public class _Element [ type LxmlElementType, object LxmlElement ]:
         return "<Element %s at %x>" % (self.tag, id(self))
     
     def __getitem__(self, Py_ssize_t index):
-        """Returns the given subelement.
-        """        
+        """Returns the subelement at the given position.
+        """
         cdef xmlNode* c_node
         c_node = _findChild(self._c_node, index)
         if c_node is NULL:
@@ -769,10 +775,10 @@ cdef public class _Element [ type LxmlElementType, object LxmlElement ]:
             return []
         c = start
         result = []
-        doc = self._doc
         while c_node is not NULL and c < stop:
             if _isElement(c_node):
-                ret = python.PyList_Append(result, _elementFactory(doc, c_node))
+                ret = python.PyList_Append(
+                    result, _elementFactory(self._doc, c_node))
                 if ret:
                     raise
                 c = c + 1
@@ -888,29 +894,34 @@ cdef public class _Element [ type LxmlElementType, object LxmlElement ]:
         return _getAttributeValue(self, key, default)
 
     def keys(self):
-        """Gets a list of attribute names. The names are returned in an arbitrary
-        order (just like for an ordinary Python dictionary).
+        """Gets a list of attribute names.  The names are returned in an
+        arbitrary order (just like for an ordinary Python dictionary).
         """
-        return python.PySequence_List( _attributeIteratorFactory(self, 1) )
+        return _collectAttributes(self._c_node, 1)
+
+    def values(self):
+        """Gets element attribute values as a sequence of strings.  The
+        attributes are returned in an arbitrary order.
+        """
+        return _collectAttributes(self._c_node, 2)
 
     def items(self):
         """Gets element attributes, as a sequence. The attributes are returned in
         an arbitrary order.
         """
-        return python.PySequence_List( _attributeIteratorFactory(self, 3) )
+        return _collectAttributes(self._c_node, 3)
 
     def getchildren(self):
         """Returns all subelements. The elements are returned in document order.
         """
         cdef xmlNode* c_node
-        cdef _Document doc
         cdef int ret
         result = []
-        doc = self._doc
         c_node = self._c_node.children
         while c_node is not NULL:
             if _isElement(c_node):
-                ret = python.PyList_Append(result, _elementFactory(doc, c_node))
+                ret = python.PyList_Append(
+                    result, _elementFactory(self._doc, c_node))
                 if ret:
                     raise
             c_node = c_node.next
@@ -1513,28 +1524,25 @@ cdef class _Attrib:
         return _getAttributeValue(self._element, key, default)
 
     def keys(self):
-        return python.PySequence_List(
-            _attributeIteratorFactory(self._element, 1) )
+        return _collectAttributes(self._element._c_node, 1)
 
     def __iter__(self):
-        return iter(self.keys())
+        return iter(_collectAttributes(self._element._c_node, 1))
     
     def iterkeys(self):
-        return iter(self.keys())
+        return iter(_collectAttributes(self._element._c_node, 1))
 
     def values(self):
-        return python.PySequence_List(
-            _attributeIteratorFactory(self._element, 2) )
+        return _collectAttributes(self._element._c_node, 2)
 
     def itervalues(self):
-        return iter(self.values())
+        return iter(_collectAttributes(self._element._c_node, 2))
 
     def items(self):
-        return python.PySequence_List(
-            _attributeIteratorFactory(self._element, 3) )
+        return _collectAttributes(self._element._c_node, 3)
 
     def iteritems(self):
-        return iter(self.items())
+        return iter(_collectAttributes(self._element._c_node, 3))
 
     def has_key(self, key):
         if key in self:
@@ -1977,12 +1985,18 @@ include "xslt.pxi"       # XSL transformations
 ################################################################################
 # Validation
 
+class DocumentInvalid(LxmlError):
+    """Validation error.  Raised by all document validators when their
+    ``assertValid(tree)`` method fails.
+    """
+    pass
+
 cdef class _Validator:
     "Base class for XML validators."
     cdef _ErrorLog _error_log
     def __init__(self):
         self._error_log = _ErrorLog()
-        
+
     def validate(self, etree):
         """Validate the document using this schema.
 

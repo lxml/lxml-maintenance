@@ -2,6 +2,9 @@
 lxml.objectify
 ==============
 
+:Authors:
+  Stefan Behnel, Holger Joukl
+
 lxml supports an alternative API similar to the Amara_ bindery or
 gnosis.xml.objectify_ through a custom Element implementation.  The main idea
 is to hide the usage of XML behind normal Python objects, sometimes referred
@@ -17,27 +20,35 @@ This API is very different from the ElementTree API.  If it is used, it should
 not be mixed with other element implementations, to avoid non-obvious
 behaviour.
 
+The `benchmark page`_ has some hints on performance optimisation of code using
+lxml.objectify.
+
 .. _Amara: http://uche.ogbuji.net/tech/4suite/amara/
 .. _gnosis.xml.objectify: http://gnosis.cx/download/
+.. _`benchmark page`: performance.html#lxml-objectify
 
 .. contents::
 ..
-   1   Setting up lxml.objectify
-   2   Creating objectify trees
-   3   Element access through object attributes
-   4   Namespace handling
-   5   ObjectPath
-   6   Python data types
-   7   Defining additional data classes
-   8   Recursive string representation of elements
-   9   What is different from ElementTree?
-   10  Resetting the API
+   1  Setting up lxml.objectify
+   2  The lxml.objectify API
+     2.1  Creating objectify trees
+     2.2  Element access through object attributes
+     2.3  Namespace handling
+   3  ObjectPath
+   4  Python data types
+     4.1  Recursive tree dump
+     4.2  Recursive string representation of elements
+   5  How data types are matched
+     5.1  Type annotations
+     5.2  The DataElement factory
+     5.3  Defining additional data classes
+   6  What is different from lxml.etree?
 
 
 Setting up lxml.objectify
--------------------------
+=========================
 
-To make use of ``objectify``, you need both the ``lxml.etree`` module and
+To set up and use ``objectify``, you need both the ``lxml.etree`` module and
 ``lxml.objectify``::
 
     >>> from lxml import etree
@@ -69,6 +80,13 @@ above setup code then becomes::
     >>> parser.setElementClassLookup(lookup)
 
 .. _`namespace specific classes`: element_classes.html#namespace-class-lookup
+
+
+The lxml.objectify API
+======================
+
+In ``lxml.objectify``, element trees provide an API that models the behaviour
+of normal Python object trees as closely as possible.
 
 
 Creating objectify trees
@@ -315,7 +333,7 @@ or for names that have a special meaning in lxml.objectify::
 
 
 ObjectPath
-----------
+==========
 
 For both convenience and speed, objectify supports its own path language,
 represented by the ``ObjectPath`` class::
@@ -452,7 +470,7 @@ with Elements from the normal lxml.etree API.
 
 
 Python data types
------------------
+=================
 
 The objectify module knows about Python data types and tries its best to let
 element content behave like them.  For example, they support the normal math
@@ -485,6 +503,67 @@ operators::
     >>> print root.d % (1234, 12345)
     1234 - 12345
 
+However, data elements continue to provide the objectify API.  This means that
+sequence operations such as ``len()``, slicing and indexing (e.g. of strings)
+cannot behave as the Python types.  Like all other tree elements, they show
+the normal slicing behaviour of objectify elements::
+
+    >>> root = objectify.fromstring("<root><a>test</a><b>toast</b></root>")
+    >>> print root.a + ' me' # behaves like a string, right?
+    test me
+    >>> len(root.a) # but there's only one 'a' element!
+    1
+    >>> [ a.tag for a in root.a ]
+    ['a']
+    >>> print root.a[0].tag
+    a
+
+    >>> print root.a
+    test
+    >>> [ str(a) for a in root.a[:1] ]
+    ['test']
+
+If you need to run sequence operations on data types, you must ask the API for
+the *real* Python value.  The string value is always available through the
+normal ElementTree ``.text`` attribute.  Additionally, all data classes
+provide a ``.pyval`` attribute that returns the value as plain Python type::
+
+    >>> root = objectify.fromstring("<root><a>test</a><b>5</b></root>")
+    >>> root.a.text
+    'test'
+    >>> root.a.pyval
+    'test'
+
+    >>> root.b.text
+    '5'
+    >>> root.b.pyval
+    5
+
+Note, however, that both attributes are read-only in objectify.  If you want
+to change values, just assign them directly to the attribute::
+
+    >>> root.a.text  = "25"
+    Traceback (most recent call last):
+      ...
+    TypeError: attribute 'text' of 'StringElement' objects is not writable
+
+    >>> root.a.pyval = 25
+    Traceback (most recent call last):
+      ...
+    TypeError: attribute 'pyval' of 'StringElement' objects is not writable
+
+    >>> root.a = 25
+    >>> print root.a
+    25
+    >>> print root.a.pyval
+    25
+
+In other words, ``objectify`` data elements behave like immutable Python
+types.  You can replace them, but not modify them.
+
+
+Recursive tree dump
+-------------------
 
 To see the data types that are currently used, you can call the module level
 ``dump()`` function that returns a recursive string representation for
@@ -544,64 +623,46 @@ You can freely switch between different types for the same child::
         a = 2 [IntElement]
         a = 3 [IntElement]
 
-However, data elements continue to provide the objectify API.  This means that
-sequence operations such as ``len()``, slicing and indexing (e.g. of strings)
-cannot behave as the Python types.  Like all other tree elements, they show
-the normal slicing behaviour of objectify elements::
 
-    >>> root = objectify.fromstring("<root><a>test</a><b>toast</b></root>")
-    >>> print root.a + ' me' # behaves like a string, right?
-    test me
-    >>> len(root.a) # but there's only one 'a' element!
-    1
-    >>> [ a.tag for a in root.a ]
-    ['a']
-    >>> print root.a[0].tag
-    a
+Recursive string representation of elements
+-------------------------------------------
 
-    >>> print root.a
-    test
-    >>> [ str(a) for a in root.a[:1] ]
-    ['test']
+Normally, elements use the standard string representation for str() that is
+provided by lxml.etree.  You can enable a pretty-print representation for
+objectify elements like this::
 
-If you need to run sequence operations on data types, you must ask the API for
-the *real* Python value.  The string value is always available through the
-normal ElementTree ``.text`` attribute.  Additionally, all data classes
-provide a ``.pyval`` attribute that returns the value as plain Python type::
+    >>> objectify.enableRecursiveStr()
 
-    >>> root = objectify.fromstring("<root><a>test</a><b>5</b></root>")
-    >>> root.a.text
-    'test'
-    >>> root.a.pyval
-    'test'
+    >>> root = objectify.fromstring("""
+    ... <root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    ...   <a attr1="foo" attr2="bar">1</a>
+    ...   <a>1.2</a>
+    ...   <b>1</b>
+    ...   <b>true</b>
+    ...   <c>what?</c>
+    ...   <d xsi:nil="true"/>
+    ... </root>
+    ... """)
 
-    >>> root.b.text
-    '5'
-    >>> root.b.pyval
-    5
+    >>> print str(root)
+    root = None [ObjectifiedElement]
+        a = 1 [IntElement]
+          * attr1 = 'foo'
+          * attr2 = 'bar'
+        a = 1.2 [FloatElement]
+        b = 1 [IntElement]
+        b = True [BoolElement]
+        c = 'what?' [StringElement]
+        d = None [NoneElement]
+          * xsi:nil = 'true'
 
-Note, however, that both attributes are read-only in objectify.  If you want
-to change values, just assign them directly to the attribute::
+This behaviour can be switched off in the same way::
 
-    >>> root.a.text  = "25"
-    Traceback (most recent call last):
-      ...
-    TypeError: attribute 'text' of 'StringElement' objects is not writable
-
-    >>> root.a.pyval = 25
-    Traceback (most recent call last):
-      ...
-    TypeError: attribute 'pyval' of 'StringElement' objects is not writable
-
-    >>> root.a = 25
-    >>> print root.a
-    25
-
-In other words, objectify data elements behave like immutable Python types.
+    >>> objectify.enableRecursiveStr(False)
 
 
 How data types are matched
---------------------------
+==========================
 
 Objectify uses two different types of Elements.  Structural Elements (or tree
 Elements) represent the object tree structure.  Data Elements represent the
@@ -635,6 +696,10 @@ at setup time.  The ``ObjectifyElementClassLookup()`` call accepts two keyword
 arguments, ``tree_class`` and ``empty_data_class``, that determine the Element
 classes used in these cases.  By default, ``tree_class`` is a class called
 ``ObjectifiedElement`` and ``empty_data_class`` is a ``StringElement``.
+
+
+Type annotations
+----------------
 
 The "type hint" mechanism deploys an XML attribute defined as
 ``lxml.objectify.PYTYPE_ATTRIBUTE``.  It may contain any of the following
@@ -726,6 +791,10 @@ and/or 'xsi:type' information::
         d = 5 [IntElement]
         l = 5 [IntElement]
         s = 5 [IntElement]
+
+
+The DataElement factory
+-----------------------
 
 For convenience, the ``DataElement()`` factory creates an Element with a
 Python value in one step.  You can pass the required Python type name or the
@@ -863,45 +932,8 @@ there already is a Python reference.  Their Python class will only be changed
 after all references are gone and the Python object is garbage collected.
 
 
-Recursive string representation of elements
--------------------------------------------
-
-Normally, elements use the standard string representation for str() that is
-provided by lxml.etree.  You can enable a pretty-print representation for
-objectify elements like this::
-
-    >>> objectify.enableRecursiveStr()
-
-    >>> root = objectify.fromstring("""
-    ... <root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    ...   <a attr1="foo" attr2="bar">1</a>
-    ...   <a>1.2</a>
-    ...   <b>1</b>
-    ...   <b>true</b>
-    ...   <c>what?</c>
-    ...   <d xsi:nil="true"/>
-    ... </root>
-    ... """)
-
-    >>> print str(root)
-    root = None [ObjectifiedElement]
-        a = 1 [IntElement]
-          * attr1 = 'foo'
-          * attr2 = 'bar'
-        a = 1.2 [FloatElement]
-        b = 1 [IntElement]
-        b = True [BoolElement]
-        c = 'what?' [StringElement]
-        d = None [NoneElement]
-          * xsi:nil = 'true'
-
-This behaviour can be switched off in the same way::
-
-    >>> objectify.enableRecursiveStr(False)
-
-
-What is different from ElementTree?
------------------------------------
+What is different from lxml.etree?
+==================================
 
 Such a different Element API obviously implies some side effects to the normal
 behaviour of the rest of the API.
@@ -914,7 +946,8 @@ behaviour of the rest of the API.
   can access all children with the ``iterchildren()`` method on elements or
   retrieve a list by calling the ``getchildren()`` method.
 
-* The find, findall and findtext methods use a different implementation as
-  they rely on the original iteration scheme.  This has the disadvantage that
-  they may not be 100% backwards compatible, and the additional advantage that
-  they now support any XPath expression.
+* The find, findall and findtext methods require a different implementation
+  based on ETXPath.  In ``lxml.etree``, they use a Python implementation based
+  on the original iteration scheme.  This has the disadvantage that they may
+  not be 100% backwards compatible, and the additional advantage that they now
+  support any XPath expression.

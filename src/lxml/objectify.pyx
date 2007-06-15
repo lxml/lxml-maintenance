@@ -101,7 +101,12 @@ def setPytypeAttributeTag(attribute_tag=None):
 setPytypeAttributeTag()
 
 
-# namespace for XML Schema instance
+# namespaces for XML Schema
+cdef object XML_SCHEMA_NS
+XML_SCHEMA_NS = "http://www.w3.org/2001/XMLSchema"
+cdef char* _XML_SCHEMA_NS
+_XML_SCHEMA_NS = _cstr(XML_SCHEMA_NS)
+
 cdef object XML_SCHEMA_INSTANCE_NS
 XML_SCHEMA_INSTANCE_NS = "http://www.w3.org/2001/XMLSchema-instance"
 cdef char* _XML_SCHEMA_INSTANCE_NS
@@ -1449,7 +1454,7 @@ cdef PyType _check_type(tree.xmlNode* c_node, PyType pytype):
     # StrType does not have a typecheck but is the default anyway,
     # so just accept it if given as type information
     if pytype is None:
-        return pytype
+        return None
     value = textOf(c_node)
     try:
         pytype.type_check(value)
@@ -1458,7 +1463,6 @@ cdef PyType _check_type(tree.xmlNode* c_node, PyType pytype):
         # could not be parsed as the specified type => ignore
         pass
     return None
-
 
 def annotate(element_or_tree, ignore_old=True):
     """Recursively annotates the elements of an XML tree with 'pytype'
@@ -1483,52 +1487,53 @@ def annotate(element_or_tree, ignore_old=True):
     NoneType = _PYTYPE_DICT.get('none')
     c_node = element._c_node
     tree.BEGIN_FOR_EACH_ELEMENT_FROM(c_node, c_node, 1)
-    pytype = None
-    value  = None
-    if not ignore:
-        # check that old value is valid
-        old_value = cetree.attributeValueFromNsName(
-            c_node, _PYTYPE_NAMESPACE, _PYTYPE_ATTRIBUTE_NAME)
-        if old_value is not None and old_value != TREE_PYTYPE:
-            dict_result = python.PyDict_GetItem(_PYTYPE_DICT, old_value)
-            if dict_result is not NULL:
-                pytype = <PyType>dict_result
-                if pytype is not StrType:
-                    # StrType does not have a typecheck but is the default anyway,
-                    # so just accept it if given as type information
-                    pytype = _check_type(c_node, pytype)
+    if c_node.type == tree.XML_ELEMENT_NODE:
+        pytype = None
+        value  = None
+        if not ignore:
+            # check that old value is valid
+            old_value = cetree.attributeValueFromNsName(
+                c_node, _PYTYPE_NAMESPACE, _PYTYPE_ATTRIBUTE_NAME)
+            if old_value is not None and old_value != TREE_PYTYPE:
+                dict_result = python.PyDict_GetItem(_PYTYPE_DICT, old_value)
+                if dict_result is not NULL:
+                    pytype = <PyType>dict_result
+                    if pytype is not StrType:
+                        # StrType does not have a typecheck but is the default
+                        # anyway, so just accept it if given as type information
+                        pytype = _check_type(c_node, pytype)
 
-    if pytype is None:
-        # if element is defined as xsi:nil, represent it as None
-        if cetree.attributeValueFromNsName(
-            c_node, _XML_SCHEMA_INSTANCE_NS, "nil") == "true":
-            pytype = NoneType
+        if pytype is None:
+            # if element is defined as xsi:nil, represent it as None
+            if cetree.attributeValueFromNsName(
+                c_node, _XML_SCHEMA_INSTANCE_NS, "nil") == "true":
+                pytype = NoneType
 
-    if pytype is None:
-        # check for XML Schema type hint
-        value = cetree.attributeValueFromNsName(
-            c_node, _XML_SCHEMA_INSTANCE_NS, "type")
+        if pytype is None:
+            # check for XML Schema type hint
+            value = cetree.attributeValueFromNsName(
+                c_node, _XML_SCHEMA_INSTANCE_NS, "type")
 
-        if value is not None:
-            dict_result = python.PyDict_GetItem(_SCHEMA_TYPE_DICT, value)
-            if dict_result is not NULL:
-                pytype = <PyType>dict_result
+            if value is not None:
+                dict_result = python.PyDict_GetItem(_SCHEMA_TYPE_DICT, value)
+                if dict_result is not NULL:
+                    pytype = <PyType>dict_result
 
-    if pytype is None:
-        # try to guess type
-        if cetree.findChildForwards(c_node, 0) is NULL:
-            # element has no children => data class
-            pytype = _guessPyType(textOf(c_node), StrType)
+        if pytype is None:
+            # try to guess type
+            if cetree.findChildForwards(c_node, 0) is NULL:
+                # element has no children => data class
+                pytype = _guessPyType(textOf(c_node), StrType)
 
-    if pytype is None:
-        # delete attribute if it exists
-        cetree.delAttributeFromNsName(
-            c_node, _PYTYPE_NAMESPACE, _PYTYPE_ATTRIBUTE_NAME)
-    else:
-        # update or create attribute
-        c_ns = cetree.findOrBuildNodeNs(doc, c_node, _PYTYPE_NAMESPACE)
-        tree.xmlSetNsProp(c_node, c_ns, _PYTYPE_ATTRIBUTE_NAME,
-                          _cstr(pytype.name))
+        if pytype is None:
+            # delete attribute if it exists
+            cetree.delAttributeFromNsName(
+                c_node, _PYTYPE_NAMESPACE, _PYTYPE_ATTRIBUTE_NAME)
+        else:
+            # update or create attribute
+            c_ns = cetree.findOrBuildNodeNs(doc, c_node, _PYTYPE_NAMESPACE)
+            tree.xmlSetNsProp(c_node, c_ns, _PYTYPE_ATTRIBUTE_NAME,
+                              _cstr(pytype.name))
     tree.END_FOR_EACH_ELEMENT_FROM(c_node)
 
 def deannotate(element_or_tree, pytype=True, xsi=True):
@@ -1546,20 +1551,23 @@ def deannotate(element_or_tree, pytype=True, xsi=True):
     c_node = element._c_node
     if pytype and xsi:
         tree.BEGIN_FOR_EACH_ELEMENT_FROM(c_node, c_node, 1)
-        cetree.delAttributeFromNsName(
-            c_node, _PYTYPE_NAMESPACE, _PYTYPE_ATTRIBUTE_NAME)
-        cetree.delAttributeFromNsName(
-            c_node, _XML_SCHEMA_INSTANCE_NS, "type")
+        if c_node.type == tree.XML_ELEMENT_NODE:
+            cetree.delAttributeFromNsName(
+                c_node, _PYTYPE_NAMESPACE, _PYTYPE_ATTRIBUTE_NAME)
+            cetree.delAttributeFromNsName(
+                c_node, _XML_SCHEMA_INSTANCE_NS, "type")
         tree.END_FOR_EACH_ELEMENT_FROM(c_node)
     elif pytype:
         tree.BEGIN_FOR_EACH_ELEMENT_FROM(c_node, c_node, 1)
-        cetree.delAttributeFromNsName(
-            c_node, _PYTYPE_NAMESPACE, _PYTYPE_ATTRIBUTE_NAME)
+        if c_node.type == tree.XML_ELEMENT_NODE:
+            cetree.delAttributeFromNsName(
+                c_node, _PYTYPE_NAMESPACE, _PYTYPE_ATTRIBUTE_NAME)
         tree.END_FOR_EACH_ELEMENT_FROM(c_node)
     else:
         tree.BEGIN_FOR_EACH_ELEMENT_FROM(c_node, c_node, 1)
-        cetree.delAttributeFromNsName(
-            c_node, _XML_SCHEMA_INSTANCE_NS, "type")
+        if c_node.type == tree.XML_ELEMENT_NODE:
+            cetree.delAttributeFromNsName(
+                c_node, _XML_SCHEMA_INSTANCE_NS, "type")
         tree.END_FOR_EACH_ELEMENT_FROM(c_node)
 
 
@@ -1570,10 +1578,13 @@ cdef object __DEFAULT_PARSER
 __DEFAULT_PARSER = etree.XMLParser(remove_blank_text=True)
 __DEFAULT_PARSER.setElementClassLookup( ObjectifyElementClassLookup() )
 
-cdef object parser
-parser = __DEFAULT_PARSER
+cdef object objectify_parser
+objectify_parser = __DEFAULT_PARSER
 
 def setDefaultParser(new_parser = None):
+    set_default_parser(new_parser)
+
+def set_default_parser(new_parser = None):
     """Replace the default parser used by objectify's Element() and
     fromstring() functions.
 
@@ -1581,16 +1592,16 @@ def setDefaultParser(new_parser = None):
 
     Call without arguments to reset to the original parser.
     """
-    global parser
+    global objectify_parser
     if new_parser is None:
-        parser = __DEFAULT_PARSER
+        objectify_parser = __DEFAULT_PARSER
     elif isinstance(new_parser, etree.XMLParser):
-        parser = new_parser
+        objectify_parser = new_parser
     else:
         raise TypeError, "parser must inherit from lxml.etree.XMLParser"
 
 cdef _Element _makeElement(tag, text, attrib, nsmap):
-    return cetree.makeElement(tag, None, parser, text, None, attrib, nsmap)
+    return cetree.makeElement(tag, None, objectify_parser, text, None, attrib, nsmap)
 
 ################################################################################
 # Module level factory functions
@@ -1603,9 +1614,17 @@ def fromstring(xml):
 
     NOTE: requires parser based element class lookup activated in lxml.etree!
     """
-    return _fromstring(xml, parser)
+    return _fromstring(xml, objectify_parser)
 
 XML = fromstring
+
+cdef object _parse
+_parse = etree.parse
+
+def parse(f, parser=None):
+    if parser is None:
+        parser = objectify_parser
+    return _parse(f, parser)
 
 cdef object _DEFAULT_NSMAP
 _DEFAULT_NSMAP = { "py": PYTYPE_NAMESPACE, "xsi": XML_SCHEMA_INSTANCE_NS }
@@ -1636,6 +1655,8 @@ def DataElement(_value, attrib=None, nsmap=None, _pytype=None, _xsi=None,
     if the type can be identified.  If '_pytype' or '_xsi' are among the
     keyword arguments, they will be used instead.
     """
+    if nsmap is None:
+        nsmap = _DEFAULT_NSMAP
     if attrib is not None:
         if python.PyDict_Size(_attributes):
             attrib.update(_attributes)
