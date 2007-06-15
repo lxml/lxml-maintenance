@@ -367,7 +367,7 @@ cdef class _BaseParser:
     cdef ElementClassLookup _class_lookup
     cdef python.PyThread_type_lock _parser_lock
 
-    def __init__(self, context_class=_ResolverContext):
+    def __init__(self, remove_comments, context_class=_ResolverContext):
         cdef xmlParserCtxt* pctxt
         if isinstance(self, HTMLParser):
             self._parser_type = LXML_HTML_PARSER
@@ -384,8 +384,11 @@ cdef class _BaseParser:
         if pctxt is NULL:
             python.PyErr_NoMemory()
         if pctxt.sax != NULL:
+            if remove_comments:
+                pctxt.sax.comment = NULL
             # hard switch-off for CDATA nodes => makes them plain text
             pctxt.sax.cdataBlock = NULL
+
         if not config.ENABLE_THREADING or \
                self._parser_type == LXML_ITERPARSE_PARSER:
             # no threading
@@ -664,6 +667,8 @@ cdef class XMLParser(_BaseParser):
     * ns_clean           - clean up redundant namespace declarations
     * recover            - try hard to parse through broken XML
     * remove_blank_text  - discard blank text nodes
+    * remove_comments    - discard comments
+    * compact            - safe memory for short text content (default: True)
 
     Note that you should avoid sharing parsers between threads.  While this is
     not harmful, it is more efficient to use separate parsers.  This does not
@@ -671,9 +676,10 @@ cdef class XMLParser(_BaseParser):
     """
     def __init__(self, attribute_defaults=False, dtd_validation=False,
                  load_dtd=False, no_network=False, ns_clean=False,
-                 recover=False, remove_blank_text=False, compact=True):
+                 recover=False, remove_blank_text=False, compact=True,
+                 remove_comments=False):
         cdef int parse_options
-        _BaseParser.__init__(self)
+        _BaseParser.__init__(self, remove_comments)
 
         parse_options = _XML_DEFAULT_PARSE_OPTIONS
         if load_dtd:
@@ -789,14 +795,16 @@ cdef class HTMLParser(_BaseParser):
     * recover            - try hard to parse through broken HTML (default: True)
     * no_network         - prevent network access
     * remove_blank_text  - discard empty text nodes
+    * remove_comments    - discard comments
+    * compact            - safe memory for short text content (default: True)
 
     Note that you should avoid sharing parsers between threads for parformance
     reasons.
     """
     def __init__(self, recover=True, no_network=False, remove_blank_text=False,
-                 compact=True):
+                 compact=True, remove_comments=False):
         cdef int parse_options
-        _BaseParser.__init__(self)
+        _BaseParser.__init__(self, remove_comments)
 
         parse_options = _HTML_DEFAULT_PARSE_OPTIONS
         if recover:

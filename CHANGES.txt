@@ -8,6 +8,8 @@ Under development
 Features added
 --------------
 
+* Parsers take a ``remove_comments`` keyword argument that skips over comments
+
 * ``parse()`` function in ``objectify``, corresponding to ``XML()`` etc.
 
 * ``Element.addnext(el)`` and ``Element.addprevious(el)`` methods to support
