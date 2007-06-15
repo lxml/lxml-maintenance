@@ -14,9 +14,7 @@ Features added
   adding processing instructions and comments around the root node
 
 * Extended type annotation in objectify: cleaner annotation namespace setup
-  plus new ``xsiannotate()`` and ``deannotate()`` functions
-
-* Element.attrib now has a ``pop()`` method
+  plus new ``deannotate()`` function
 
 * Support for custom Element class instantiation in lxml.sax: passing a
   ``makeelement()`` function to the ElementTreeContentHandler will reuse the
@@ -40,7 +38,7 @@ Bugs fixed
 
 * More ET compatible behaviour when writing out XML declarations or not
 
-* ``Element.attrib`` was missing ``clear()`` method
+* ``Element.attrib`` was missing ``clear()`` and ``pop()`` methods
 
 * More robust error handling in ``iterparse()``
 
