@@ -1011,12 +1011,13 @@ cdef object _dump(_Element element, int indent):
     xsi_ns    = "{%s}" % XML_SCHEMA_INSTANCE_NS
     pytype_ns = "{%s}" % PYTYPE_NAMESPACE
     for name, value in cetree.iterattributes(element, 3):
-        if name == PYTYPE_ATTRIBUTE:
-            if value == TREE_PYTYPE:
-                continue
-            else:
-                name = name.replace(pytype_ns, 'py:')
-        name = name.replace(xsi_ns, 'xsi:')
+        if '{' in name:
+            if name == PYTYPE_ATTRIBUTE:
+                if value == TREE_PYTYPE:
+                    continue
+                else:
+                    name = name.replace(pytype_ns, 'py:')
+            name = name.replace(xsi_ns, 'xsi:')
         result = result + "%s  * %s = %r\n" % (indentstr, name, value)
 
     indent = indent + 1
@@ -1097,6 +1098,9 @@ cdef object _lookupElementClass(state, _Document doc, tree.xmlNode* c_node):
 
     if value is not None:
         dict_result = python.PyDict_GetItem(_SCHEMA_TYPE_DICT, value)
+        if dict_result is NULL and ':' in value:
+            prefix, value = value.split(':', 1)
+            dict_result = python.PyDict_GetItem(_SCHEMA_TYPE_DICT, value)
         if dict_result is not NULL:
             return (<PyType>dict_result)._type
 
@@ -1516,6 +1520,9 @@ def annotate(element_or_tree, ignore_old=True):
 
             if value is not None:
                 dict_result = python.PyDict_GetItem(_SCHEMA_TYPE_DICT, value)
+                if dict_result is NULL and ':' in value:
+                    prefix, value = value.split(':', 1)
+                    dict_result = python.PyDict_GetItem(_SCHEMA_TYPE_DICT, value)
                 if dict_result is not NULL:
                     pytype = <PyType>dict_result
 
@@ -1627,7 +1634,9 @@ def parse(f, parser=None):
     return _parse(f, parser)
 
 cdef object _DEFAULT_NSMAP
-_DEFAULT_NSMAP = { "py": PYTYPE_NAMESPACE, "xsi": XML_SCHEMA_INSTANCE_NS }
+_DEFAULT_NSMAP = { "py"  : PYTYPE_NAMESPACE,
+                   "xsi" : XML_SCHEMA_INSTANCE_NS,
+                   "xsd" : XML_SCHEMA_NS}
 
 def Element(_tag, attrib=None, nsmap=None, _pytype=None, **_attributes):
     """Objectify specific version of the lxml.etree Element() factory that
