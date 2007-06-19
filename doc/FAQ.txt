@@ -7,8 +7,8 @@ Frequently Asked Questions (FAQ)
   :keywords: lxml, lxml.etree, FAQ, frequently asked questions
   :authors: Stefan Behnel, and various people on the mailing list
 
-
-See also the notes on compatibility_ to ElementTree_.
+Frequently asked questions on lxml.  See also the notes on compatibility_ to
+ElementTree_.
 
 .. _compatibility: compatibility.html
 .. _ElementTree:   http://effbot.org/zone/element-index.htm
