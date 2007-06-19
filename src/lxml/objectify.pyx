@@ -1664,6 +1664,7 @@ def DataElement(_value, attrib=None, nsmap=None, _pytype=None, _xsi=None,
     if the type can be identified.  If '_pytype' or '_xsi' are among the
     keyword arguments, they will be used instead.
     """
+    cdef python.PyObject* dict_result
     if nsmap is None:
         nsmap = _DEFAULT_NSMAP
     if attrib is not None:
@@ -1671,12 +1672,19 @@ def DataElement(_value, attrib=None, nsmap=None, _pytype=None, _xsi=None,
             attrib.update(_attributes)
         _attributes = attrib
     if _xsi is not None:
+        if ':' in _xsi:
+            prefix, name = _xsi.split(':', 1)
+            ns = nsmap.get(prefix)
+            if ns != XML_SCHEMA_NS:
+                raise ValueError, "XSD types require the XSD namespace"
         python.PyDict_SetItem(_attributes, XML_SCHEMA_INSTANCE_TYPE_ATTR, _xsi)
         if _pytype is None:
-            # allow for s.o. using unregistered or even wrong xsi:type names
-            pytype_lookup = _SCHEMA_TYPE_DICT.get(_xsi)
-            if pytype_lookup is not None:
-                _pytype = pytype_lookup.name
+            # allow using unregistered or even wrong xsi:type names
+            dict_result = python.PyDict_GetItem(_SCHEMA_TYPE_DICT, _xsi)
+            if dict_result is NULL:
+                dict_result = python.PyDict_GetItem(_SCHEMA_TYPE_DICT, name)
+            if dict_result is not NULL:
+                _pytype = (<PyType>dict_result).name
 
     if python._isString(_value):
         strval = _value
