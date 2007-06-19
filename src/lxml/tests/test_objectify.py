@@ -22,6 +22,24 @@ DEFAULT_NSMAP = { "py" : PYTYPE_NAMESPACE,
                   "xsi" : XML_SCHEMA_INSTANCE_NS,
                   "xsd" : XML_SCHEMA_NS}
 
+objectclass2xsitype = {
+    # objectify built-in
+    objectify.IntElement: ("int", "short", "byte", "unsignedShort",
+                           "unsignedByte",),
+    objectify.LongElement: ("integer", "nonPositiveInteger", "negativeInteger",
+                            "long", "nonNegativeInteger", "unsignedLong",
+                            "unsignedInt", "positiveInteger",),
+    objectify.FloatElement: ("float", "double"),
+    objectify.BoolElement: ("boolean",),
+    objectify.StringElement: ("string", "normalizedString", "token", "language",
+                              "Name", "NCName", "ID", "IDREF", "ENTITY",
+                              "NMTOKEN", ),
+    # None: xsi:nil="true"
+    }
+
+xsitype2objclass = dict(( (v, k) for k in objectclass2xsitype
+                          for v in objectclass2xsitype[k] ))
+
 xml_str = '''\
 <obj:root xmlns:obj="objectified" xmlns:other="otherNS">
   <obj:c1 a1="A1" a2="A2" other:a3="A3">
@@ -475,6 +493,24 @@ class ObjectifyTestCase(HelperTestCase):
         value = objectify.DataElement(5.5)
         self.assert_(isinstance(value, objectify.FloatElement))
         self.assertEquals(value, 5.5)
+
+    def test_data_element_xsitypes(self):
+        for xsi, objclass in xsitype2objclass.iteritems():
+            # 1 is a valid value for all ObjectifiedDataElement classes
+            value = objectify.DataElement(1, _xsi=xsi)
+            self.assert_(isinstance(value, objclass))
+        
+    def test_data_element_xsitypes_xsdprefixed(self):
+        for xsi, objclass in xsitype2objclass.iteritems():
+            # 1 is a valid value for all ObjectifiedDataElement classes
+            value = objectify.DataElement(1, _xsi="xsd:%s" % xsi)
+            self.assert_(isinstance(value, objclass))
+        
+    def test_data_element_xsitypes_prefixed(self):
+        for xsi, objclass in xsitype2objclass.iteritems():
+            # 1 is a valid value for all ObjectifiedDataElement classes
+            self.assertRaises(ValueError, objectify.DataElement, 1,
+                              _xsi="foo:%s" % xsi)
 
     def test_schema_types(self):
         XML = self.XML
