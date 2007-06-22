@@ -168,9 +168,12 @@ You can search the archive with Gmane_ or Google_.
 License
 -------
 
-The lxml library is shipped under a BSD license. libxml2 and libxslt2
-itself are shipped under the MIT license. There should therefore be no
+The lxml library is shipped under a `BSD license`_. libxml2 and libxslt2
+itself are shipped under the `MIT license`_. There should therefore be no
 obstacle to using lxml in your codebase.
+
+.. _`BSD license`: http://codespeak.net/svn/lxml/trunk/doc/licenses/BSD.txt
+.. _`MIT license`: http://www.opensource.org/licenses/mit-license.html
 
 
 Old Versions
