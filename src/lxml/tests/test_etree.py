@@ -1362,7 +1362,7 @@ class ETreeOnlyTestCase(HelperTestCase):
 
     def test_sourceline_parse(self):
         parse = self.etree.parse
-        tree = parse(fileInTestDir('test_xinclude.xml'))
+        tree = parse(fileInTestDir('include/test_xinclude.xml'))
 
         self.assertEquals(
             [1, 2, 3],
