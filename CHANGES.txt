@@ -8,6 +8,9 @@ Under development
 Features added
 --------------
 
+* Module ``lxml.pyclasslookup`` implemens an Element class lookup scheme that
+  can access the entire tree to determine a suitable Element class
+
 * Parsers take a ``remove_comments`` keyword argument that skips over comments
 
 * ``parse()`` function in ``objectify``, corresponding to ``XML()`` etc.
