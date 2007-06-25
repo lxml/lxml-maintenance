@@ -1408,7 +1408,7 @@ cdef public class _ElementTree [ type LxmlElementTreeType,
         FTP.
 
         Note that XInclude does not support custom resolvers in Python space
-        due to restrictions of libxml2 <= 2.6.28.
+        due to restrictions of libxml2 <= 2.6.29.
         """
         cdef python.PyThreadState* state
         cdef int result
