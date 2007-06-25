@@ -8,8 +8,9 @@ lxml changelog
 Features added
 --------------
 
-* Module ``lxml.pyclasslookup`` implemens an Element class lookup scheme that
-  can access the entire tree to determine a suitable Element class
+* Module ``lxml.pyclasslookup`` module implements an Element class lookup
+  scheme that can access the entire tree in read-only mode to help determining
+  a suitable Element class
 
 * Parsers take a ``remove_comments`` keyword argument that skips over comments
 
@@ -17,6 +18,8 @@ Features added
 
 * ``Element.addnext(el)`` and ``Element.addprevious(el)`` methods to support
   adding processing instructions and comments around the root node
+
+* ``Element.attrib`` was missing ``clear()`` and ``pop()`` methods
 
 * Extended type annotation in objectify: cleaner annotation namespace setup
   plus new ``deannotate()`` function
@@ -26,6 +29,11 @@ Features added
   lookup context of that function
 
 * '.' represents empty ObjectPath (identity)
+
+* ``Element.values()`` to accompany the existing ``.keys()`` and ``.items()``
+
+* ``collectAttributes()`` C-function to build a list of attribute
+  keys/values/items for a libxml2 node
 
 Bugs fixed
 ----------
@@ -42,13 +50,15 @@ Bugs fixed
   ``ProcessingInstruction`` as tags
 
 * API functions now check incoming strings for XML conformity.  Zero bytes or
-  low ASCII characters are no longer accepted.
+  low ASCII characters are no longer accepted (AssertionError).
 
 * XSLT parsing failed to pass resolver context on to imported documents
 
-* More ET compatible behaviour when writing out XML declarations or not
+* passing '' as namespace prefix in nsmap could be passed through to libxml2
 
-* ``Element.attrib`` was missing ``clear()`` and ``pop()`` methods
+* Objectify couldn't handle prefixed XSD type names in ``xsi:type``
+
+* More ET compatible behaviour when writing out XML declarations or not
 
 * More robust error handling in ``iterparse()``
 
@@ -56,8 +66,6 @@ Bugs fixed
 
 * lxml.sax failed on comments and PIs. Comments are now properly ignored and
   PIs are copied.
-
-* Raise AssertionError when passing strings containing '\0' bytes
 
 
 1.3beta (2007-02-27)
