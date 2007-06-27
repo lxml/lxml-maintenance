@@ -2,6 +2,18 @@
 lxml changelog
 ==============
 
+Under development
+=================
+
+Features added
+--------------
+
+Bugs fixed
+----------
+
+* Reference-counting bug in ``Element.attrib.pop()``
+
+
 1.3 (2007-06-24)
 ================
 
