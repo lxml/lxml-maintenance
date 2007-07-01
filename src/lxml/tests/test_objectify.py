@@ -74,115 +74,204 @@ class ObjectifyTestCase(HelperTestCase):
         self.etree.Namespace("otherNS").clear()
         objectify.setPytypeAttributeTag()
 
-    def test_element_nsmap(self):
-        # default nsmap
-        root = objectify.Element("test")
-        self.assertEquals(root.nsmap, DEFAULT_NSMAP)
+    def test_element_nsmap_default(self):
+        elt = objectify.Element("test")
+        self.assertEquals(elt.nsmap, DEFAULT_NSMAP)
 
-        # empty nsmap
+    def test_element_nsmap_empty(self):
         nsmap = {}
-        root = objectify.Element("test", nsmap=nsmap)
-        self.assertEquals(root.nsmap.values(), [PYTYPE_NAMESPACE])
+        elt = objectify.Element("test", nsmap=nsmap)
+        self.assertEquals(elt.nsmap.values(), [PYTYPE_NAMESPACE])
 
-        # nsmap with custom prefixes
-        nsmap = {"mypy" : PYTYPE_NAMESPACE,
-                 "myxsi" : XML_SCHEMA_INSTANCE_NS,
-                 "myxsd" : XML_SCHEMA_NS}
-        root = objectify.Element("test", nsmap=nsmap)
-        self.assertEquals(root.nsmap, nsmap)
+    def test_element_nsmap_custom_prefixes(self):
+        nsmap = {"mypy": PYTYPE_NAMESPACE,
+                 "myxsi": XML_SCHEMA_INSTANCE_NS,
+                 "myxsd": XML_SCHEMA_NS}
+        elt = objectify.Element("test", nsmap=nsmap)
+        self.assertEquals(elt.nsmap, nsmap)
         
-        # custom nsmap
-        nsmap = {"my"  : "someNS",
-                 "myother" : "someOtherNS",
-                 }
-        root = objectify.Element("test", nsmap=nsmap)
-        self.assert_(PYTYPE_NAMESPACE in root.nsmap.values())
+    def test_element_nsmap_custom(self):
+        nsmap = {"my": "someNS",
+                 "myother": "someOtherNS",
+                 "myxsd": XML_SCHEMA_NS}
+        elt = objectify.Element("test", nsmap=nsmap)
+        self.assert_(PYTYPE_NAMESPACE in elt.nsmap.values())
         for prefix, ns in nsmap.items():
-            self.assert_(prefix in root.nsmap)
-            self.assertEquals(nsmap[prefix], root.nsmap[prefix]) 
+            self.assert_(prefix in elt.nsmap)
+            self.assertEquals(nsmap[prefix], elt.nsmap[prefix]) 
         
-    def test_sub_element_nsmap(self):
+    def test_sub_element_nsmap_default(self):
         root = objectify.Element("root")
-        # default nsmap
         root.sub = objectify.Element("test")
         self.assertEquals(root.sub.nsmap, DEFAULT_NSMAP)
 
-        # empty nsmap
+    def test_sub_element_nsmap_empty(self):
+        root = objectify.Element("root")
         nsmap = {}
         root.sub = objectify.Element("test", nsmap=nsmap)
         self.assertEquals(root.sub.nsmap, DEFAULT_NSMAP)
 
-        # nsmap with custom prefixes
-        nsmap = {"mypy" : PYTYPE_NAMESPACE,
-                 "myxsi" : XML_SCHEMA_INSTANCE_NS,
-                 "myxsd" : XML_SCHEMA_NS}
+    def test_sub_element_nsmap_custom_prefixes(self):
+        root = objectify.Element("root")
+        nsmap = {"mypy": PYTYPE_NAMESPACE,
+                 "myxsi": XML_SCHEMA_INSTANCE_NS,
+                 "myxsd": XML_SCHEMA_NS}
         root.sub = objectify.Element("test", nsmap=nsmap)
         self.assertEquals(root.sub.nsmap, DEFAULT_NSMAP)
         
-        # custom nsmap
-        nsmap = {"my"  : "someNS",
-                 "myother" : "someOtherNS",
-                 }
+    def test_sub_element_nsmap_custom(self):
+        root = objectify.Element("root")
+        nsmap = {"my": "someNS",
+                 "myother": "someOtherNS",
+                 "myxsd": XML_SCHEMA_NS,}
         root.sub = objectify.Element("test", nsmap=nsmap)
         expected = nsmap.copy()
+        del expected["myxsd"]
         expected.update(DEFAULT_NSMAP)
         self.assertEquals(root.sub.nsmap, expected) 
         
-    def test_data_element_nsmap(self):
-        # default nsmap
+    def test_data_element_nsmap_default(self):
         value = objectify.DataElement("test this")
         self.assertEquals(value.nsmap, DEFAULT_NSMAP)
 
-        # empty nsmap
+    def test_data_element_nsmap_empty(self):
         nsmap = {}
         value = objectify.DataElement("test this", nsmap=nsmap)
         self.assertEquals(value.nsmap.values(), [PYTYPE_NAMESPACE])
 
-        # nsmap with custom prefixes
-        nsmap = {"mypy" : PYTYPE_NAMESPACE,
-                 "myxsi" : XML_SCHEMA_INSTANCE_NS,
-                 "myxsd" : XML_SCHEMA_NS}
-
+    def test_data_element_nsmap_custom_prefixes(self):
+        nsmap = {"mypy": PYTYPE_NAMESPACE,
+                 "myxsi": XML_SCHEMA_INSTANCE_NS,
+                 "myxsd": XML_SCHEMA_NS}
         value = objectify.DataElement("test this", nsmap=nsmap)
         self.assertEquals(value.nsmap, nsmap)
         
-        # custom nsmap
-        nsmap = {"my"  : "someNS",
-                 "myother" : "someOtherNS",
-                 }
+    def test_data_element_nsmap_custom(self):
+        nsmap = {"my": "someNS",
+                 "myother": "someOtherNS",
+                 "myxsd": XML_SCHEMA_NS,}
         value = objectify.DataElement("test", nsmap=nsmap)
         self.assert_(PYTYPE_NAMESPACE in value.nsmap.values())
         for prefix, ns in nsmap.items():
             self.assert_(prefix in value.nsmap)
             self.assertEquals(nsmap[prefix], value.nsmap[prefix]) 
         
-    def test_sub_data_element_nsmap(self):
+    def test_sub_data_element_nsmap_default(self):
         root = objectify.Element("root")
-        # default nsmap
         root.value = objectify.DataElement("test this")
         self.assertEquals(root.value.nsmap, DEFAULT_NSMAP)
 
-        # empty nsmap
+    def test_sub_data_element_nsmap_empty(self):
+        root = objectify.Element("root")
         nsmap = {}
         root.value = objectify.DataElement("test this", nsmap=nsmap)
         self.assertEquals(root.value.nsmap, DEFAULT_NSMAP)
 
-        # nsmap with custom prefixes
-        nsmap = {"mypy" : PYTYPE_NAMESPACE,
-                 "myxsi" : XML_SCHEMA_INSTANCE_NS,
-                 "myxsd" : XML_SCHEMA_NS}
-
+    def test_sub_data_element_nsmap_custom_prefixes(self):
+        root = objectify.Element("root")
+        nsmap = {"mypy": PYTYPE_NAMESPACE,
+                 "myxsi": XML_SCHEMA_INSTANCE_NS,
+                 "myxsd": XML_SCHEMA_NS}
         root.value = objectify.DataElement("test this", nsmap=nsmap)
         self.assertEquals(root.value.nsmap, DEFAULT_NSMAP)
         
-        # custom nsmap
-        nsmap = {"my"  : "someNS",
-                 "myother" : "someOtherNS",
-                 }
+    def test_sub_data_element_nsmap_custom(self):
+        root = objectify.Element("root")
+        nsmap = {"my": "someNS",
+                 "myother": "someOtherNS",
+                 "myxsd": XML_SCHEMA_NS}
         root.value = objectify.DataElement("test", nsmap=nsmap)
         expected = nsmap.copy()
+        del expected["myxsd"]
         expected.update(DEFAULT_NSMAP)
         self.assertEquals(root.value.nsmap, expected) 
+        
+    def test_data_element_attrib_attributes_precedence(self):
+        # keyword arguments override attrib entries
+        value = objectify.DataElement(23, _pytype="str", _xsi="foobar",
+                                      attrib={"gnu": "muh", "cat": "meeow",
+                                              "dog": "wuff"},
+                                      bird="tchilp", dog="grrr")
+        self.assertEquals(value.get("gnu"), "muh")
+        self.assertEquals(value.get("cat"), "meeow")
+        self.assertEquals(value.get("dog"), "grrr")
+        self.assertEquals(value.get("bird"), "tchilp")
+        
+    def test_data_element_data_element_arg(self):
+        # Check that DataElement preserves all attributes ObjectifiedDataElement
+        # arguments
+        arg = objectify.DataElement(23, _pytype="str", _xsi="foobar",
+                                    attrib={"gnu": "muh", "cat": "meeow",
+                                            "dog": "wuff"},
+                                    bird="tchilp", dog="grrr")
+        value = objectify.DataElement(arg)
+        self.assert_(isinstance(value, objectify.StringElement))
+        for attr in arg.attrib:
+            self.assertEquals(value.get(attr), arg.get(attr))
+
+    def test_data_element_data_element_arg_pytype(self):
+        # Check that _pytype arg overrides original py:pytype of
+        # ObjectifiedDataElement
+        arg = objectify.DataElement(23, _pytype="str", _xsi="foobar",
+                                    attrib={"gnu": "muh", "cat": "meeow",
+                                            "dog": "wuff"},
+                                    bird="tchilp", dog="grrr")
+        value = objectify.DataElement(arg, _pytype="int")
+        self.assert_(isinstance(value, objectify.IntElement))
+        self.assertEquals(value.get(objectify.PYTYPE_ATTRIBUTE), "int")
+        for attr in arg.attrib:
+            if not attr == objectify.PYTYPE_ATTRIBUTE:
+                self.assertEquals(value.get(attr), arg.get(attr))
+
+    def test_data_element_data_element_arg_xsitype(self):
+        # Check that _xsi arg overrides original xsi:type of given
+        # ObjectifiedDataElement
+        arg = objectify.DataElement(23, _pytype="str", _xsi="foobar",
+                                    attrib={"gnu": "muh", "cat": "meeow",
+                                            "dog": "wuff"},
+                                    bird="tchilp", dog="grrr")
+        value = objectify.DataElement(arg, _xsi="xsd:int")
+        self.assert_(isinstance(value, objectify.IntElement))
+        self.assertEquals(value.get(XML_SCHEMA_INSTANCE_TYPE_ATTR), "xsd:int")
+        self.assertEquals(value.get(objectify.PYTYPE_ATTRIBUTE), "int")
+        for attr in arg.attrib:
+            if not attr in [objectify.PYTYPE_ATTRIBUTE,
+                            XML_SCHEMA_INSTANCE_TYPE_ATTR]:
+                self.assertEquals(value.get(attr), arg.get(attr))
+
+    def test_data_element_data_element_arg_pytype_xsitype(self):
+        # Check that _pytype and _xsi args override original py:pytype and
+        # xsi:type attributes of given ObjectifiedDataElement
+        arg = objectify.DataElement(23, _pytype="str", _xsi="foobar",
+                                    attrib={"gnu": "muh", "cat": "meeow",
+                                            "dog": "wuff"},
+                                    bird="tchilp", dog="grrr")
+        value = objectify.DataElement(arg, _pytype="int", _xsi="xsd:int")
+        self.assert_(isinstance(value, objectify.IntElement))
+        self.assertEquals(value.get(objectify.PYTYPE_ATTRIBUTE), "int")
+        self.assertEquals(value.get(XML_SCHEMA_INSTANCE_TYPE_ATTR), "xsd:int")
+        for attr in arg.attrib:
+            if not attr in [objectify.PYTYPE_ATTRIBUTE,
+                            XML_SCHEMA_INSTANCE_TYPE_ATTR]:
+                self.assertEquals(value.get(attr), arg.get(attr))
+
+    def test_data_element_invalid_pytype(self):
+        self.assertRaises(ValueError, objectify.DataElement, 3.1415,
+                          _pytype="int")
+
+    def test_data_element_invalid_xsi(self):
+        self.assertRaises(ValueError, objectify.DataElement, 3.1415,
+                          _xsi="xsd:int")
+        
+    def test_data_element_data_element_arg_invalid_pytype(self):
+        arg = objectify.DataElement(3.1415)
+        self.assertRaises(ValueError, objectify.DataElement, arg,
+                          _pytype="int")
+
+    def test_data_element_data_element_arg_invalid_xsi(self):
+        arg = objectify.DataElement(3.1415)
+        self.assertRaises(ValueError, objectify.DataElement, arg,
+                          _xsi="xsd:int")
         
     def test_root(self):
         root = self.Element("test")
@@ -400,7 +489,7 @@ class ObjectifyTestCase(HelperTestCase):
         Element = self.Element
         SubElement = self.etree.SubElement
 
-        nil_attr = "{http://www.w3.org/2001/XMLSchema-instance}nil"
+        nil_attr = XML_SCHEMA_NIL_ATTR
         root = Element("{objectified}root")
         SubElement(root, "{objectified}none")
         SubElement(root, "{objectified}none", {nil_attr : "true"})
@@ -414,6 +503,7 @@ class ObjectifyTestCase(HelperTestCase):
         value = objectify.DataElement(None)
         self.assert_(isinstance(value, objectify.NoneElement))
         self.assertEquals(value, None)
+        self.assertEquals(value.get(XML_SCHEMA_NIL_ATTR), "true")
 
     def test_type_bool(self):
         Element = self.Element

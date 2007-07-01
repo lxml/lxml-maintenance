@@ -8,8 +8,15 @@ Under development
 Features added
 --------------
 
+* objectify.DataElement now supports setting values from existing data
+  elements (not just plain Python types) and reuses defined namespaces etc.
+
 Bugs fixed
 ----------
+
+* objectify.DataElement didn't set up None value correctly
+
+* objectify.DataElement didn't check the value against the provided type hints
 
 * Reference-counting bug in ``Element.attrib.pop()``
 
