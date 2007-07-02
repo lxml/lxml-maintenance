@@ -65,6 +65,8 @@ except AttributeError:
 cdef object islice
 from itertools import islice
 
+cdef object _ElementMaker
+from builder import ElementMaker as _ElementMaker
 
 # namespace/name for "pytype" hint attribute
 cdef object PYTYPE_NAMESPACE
@@ -1632,6 +1634,42 @@ def parse(f, parser=None):
     if parser is None:
         parser = objectify_parser
     return _parse(f, parser)
+
+class ElementMaker(_ElementMaker):
+    def __init__(self, typemap=None):
+        if typemap is None:
+            typemap = {}
+        else:
+            typemap = typemap.copy()
+
+        typemap[__builtin__.str]     = __add_text
+        typemap[__builtin__.unicode] = __add_text
+        typemap[__builtin__.int]     = __add_text
+        typemap[__builtin__.long]    = __add_text
+        typemap[__builtin__.float]   = __add_text
+        typemap[__builtin__.bool]    = __add_text
+
+        _ElementMaker.__init__(self, typemap, objectify_parser.makeelement)
+
+def __add_text(_Element elem not None, text):
+    cdef tree.xmlNode* c_child
+    if isinstance(text, bool):
+        text = str(text).lower()
+    else:
+        text = str(text)
+    c_child = cetree.findChildBackwards(elem._c_node, 0)
+    if c_child is not NULL:
+        old = cetree.tailOf(c_child)
+        if old is not None:
+            text = old + text
+        cetree.setTailText(c_child, text)
+    else:
+        old = cetree.textOf(elem._c_node)
+        if old is not None:
+            text = old + text
+        cetree.setNodeText(elem._c_node, text)
+
+E = ElementMaker()
 
 cdef object _DEFAULT_NSMAP
 _DEFAULT_NSMAP = { "py"  : PYTYPE_NAMESPACE,

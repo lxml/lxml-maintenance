@@ -11,6 +11,8 @@ Features added
 * objectify.DataElement now supports setting values from existing data
   elements (not just plain Python types) and reuses defined namespaces etc.
 
+* E-factory support for lxml.objectify (``objectify.E``)
+
 Bugs fixed
 ----------
 

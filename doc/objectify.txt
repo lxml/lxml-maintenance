@@ -266,6 +266,45 @@ Note that special care must be taken when changing the tag name of an element::
     notB
 
 
+Tree generation with the E-factory
+----------------------------------
+
+To simplify the generation of trees even further, you can use the E-factory::
+
+    >>> E = objectify.E
+    >>> root = E.root(
+    ...   E.a(5),
+    ...   E.b(6.1),
+    ...   E.c(True),
+    ...   E.d("how")
+    ... )
+
+    >>> print etree.tostring(root, pretty_print=True)
+    <root>
+      <a>5</a>
+      <b>6.1</b>
+      <c>true</c>
+      <d>how</d>
+    </root>
+
+This allows you to write up a specific language in tags::
+
+    >>> ROOT = objectify.E.root
+    >>> TITLE = objectify.E.title
+    >>> TYPE = objectify.E.type
+
+    >>> root = ROOT(
+    ...   TITLE("The title"),
+    ...   TYPE(5)
+    ... )
+
+    >>> print etree.tostring(root, pretty_print=True)
+    <root>
+      <title>The title</title>
+      <type>5</type>
+    </root>
+
+
 Namespace handling
 ------------------
 
