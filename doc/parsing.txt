@@ -24,13 +24,35 @@ Parsers
 Parsers are represented by parser objects.  There is support for parsing both
 XML and (broken) HTML.  Note that XHTML is best parsed as XML, parsing it with
 the HTML parser can lead to unexpected results.  Here is a simple example for
-XML parsing::
+parsing XML from an in-memory string::
 
   >>> xml = '<a xmlns="test"><b xmlns="test"/></a>'
 
-  >>> et = etree.parse(StringIO(xml))
-  >>> print etree.tostring(et.getroot())
+  >>> root = etree.fromstring(xml)
+  >>> print etree.tostring(root)
   <a xmlns="test"><b xmlns="test"/></a>
+
+To read from a file or file-like object, you can use the ``parse()`` function,
+which returns an ``ElementTree`` object::
+
+  >>> tree = etree.parse(StringIO(xml))
+  >>> print etree.tostring(tree.getroot())
+  <a xmlns="test"><b xmlns="test"/></a>
+
+Note how the ``parse()`` function reads from a file-like object here.  If
+parsing is done from a real file, it is more common (and also somewhat more
+efficient) to pass a filename::
+
+  >>> tree = etree.parse("doc/test.xml")
+
+lxml can parse from a local file, an HTTP URL or an FTP URL.  It also
+auto-detects and reads gzip-compressed XML files (.gz).
+
+If you want to parse from memory and still provide a base URL for the document
+(e.g. to support relative paths in an XInclude), you can pass the ``base_url``
+keyword argument::
+
+  >>> root = etree.fromstring(xml, base_url="http://where.it/is/from.xml")
 
 
 Parser options
@@ -40,8 +62,8 @@ The parsers accept a number of setup options as keyword arguments.  The above
 example is easily extended to clean up namespaces during parsing::
 
   >>> parser = etree.XMLParser(ns_clean=True)
-  >>> et     = etree.parse(StringIO(xml), parser)
-  >>> print etree.tostring(et.getroot())
+  >>> tree   = etree.parse(StringIO(xml), parser)
+  >>> print etree.tostring(tree.getroot())
   <a xmlns="test"><b/></a>
 
 The keyword arguments in the constructor are mainly based on the libxml2
@@ -81,9 +103,9 @@ version 2.6.21 or newer to take advantage of this feature::
   >>> broken_html = "<html><head><title>test<body><h1>page title</h3>"
 
   >>> parser = etree.HTMLParser()
-  >>> et     = etree.parse(StringIO(broken_html), parser)
+  >>> tree   = etree.parse(StringIO(broken_html), parser)
 
-  >>> print etree.tostring(et.getroot(), pretty_print=True)
+  >>> print etree.tostring(tree.getroot(), pretty_print=True)
   <html>
     <head>
       <title>test</title>
