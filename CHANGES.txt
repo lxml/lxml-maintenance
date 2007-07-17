@@ -25,6 +25,9 @@ Bugs fixed
 
 * ``Element()`` did not raise an exception on tag names containing ':'
 
+* ``Element.getiterator(tag)`` did not accept ``Comment`` and
+  ``ProcessingInstruction`` as tags. It also accepts ``Element`` now.
+
 
 1.3.2 (2007-07-03)
 ==================

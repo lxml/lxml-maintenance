@@ -1631,6 +1631,8 @@ cdef public class _ElementTagMatcher [ object LxmlElementTagMatcher,
             self._node_type = tree.XML_COMMENT_NODE
         elif tag is ProcessingInstruction:
             self._node_type = tree.XML_PI_NODE
+        elif tag is Element:
+            self._node_type = tree.XML_ELEMENT_NODE
         else:
             self._node_type = tree.XML_ELEMENT_NODE
             self._pystrings = _getNsTag(tag)

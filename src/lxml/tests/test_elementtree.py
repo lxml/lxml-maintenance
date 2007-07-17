@@ -1455,6 +1455,20 @@ class ETreeTestCaseBase(HelperTestCase):
             [a2],
             list(c.getiterator('a')))
 
+    def test_getiterator_filter_all(self):
+        Element = self.etree.Element
+        SubElement = self.etree.SubElement
+
+        a = Element('a')
+        b = SubElement(a, 'b')
+        c = SubElement(a, 'c')
+        d = SubElement(b, 'd')
+        e = SubElement(c, 'e')
+
+        self.assertEquals(
+            [a, b, d, c, e],
+            list(a.getiterator('*')))
+
     def test_getiterator_filter_comment(self):
         Element = self.etree.Element
         Comment = self.etree.Comment
