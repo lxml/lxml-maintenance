@@ -144,7 +144,7 @@ _UNICODE_ENCODING = NULL
 
 cdef void _setupPythonUnicode():
     """Sets _UNICODE_ENCODING to the internal encoding name of Python unicode
-    strings if libxmls supports reading native Python unicode.  This depends
+    strings if libxml2 supports reading native Python unicode.  This depends
     on iconv and the local Python installation, so we simply check if we find
     a matching encoding handler.
     """
@@ -156,6 +156,19 @@ cdef void _setupPythonUnicode():
     l = python.PyUnicode_GET_DATA_SIZE(utext)
     buffer = python.PyUnicode_AS_DATA(utext)
     enc = _findEncodingName(buffer, l)
+    if enc == NULL:
+        # apparently, libxml2 can't detect UTF-16 on some systems
+        if l >= 4 and \
+               buffer[0] == c'<' and buffer[1] == c'\0' and \
+               buffer[2] == c't' and buffer[3] == c'\0':
+            enc = "UTF-16LE"
+        elif l >= 4 and \
+               buffer[0] == c'\0' and buffer[1] == c'<' and \
+               buffer[2] == c'\0' and buffer[3] == c't':
+            enc = "UTF-16BE"
+        else:
+            # not my fault, it's YOUR broken system :)
+            return
     enchandler = tree.xmlFindCharEncodingHandler(enc)
     if enchandler is not NULL:
         global _UNICODE_ENCODING
@@ -167,13 +180,15 @@ cdef char* _findEncodingName(char* buffer, int size):
     cdef tree.xmlCharEncoding enc
     enc = tree.xmlDetectCharEncoding(buffer, size)
     if enc == tree.XML_CHAR_ENCODING_UTF16LE:
-        return "UTF16LE"
+        return "UTF-16LE"
     elif enc == tree.XML_CHAR_ENCODING_UTF16BE:
-        return "UTF16BE"
+        return "UTF-16BE"
     elif enc == tree.XML_CHAR_ENCODING_UCS4LE:
         return "UCS-4LE"
     elif enc == tree.XML_CHAR_ENCODING_UCS4BE:
         return "UCS-4BE"
+    elif enc == tree.XML_CHAR_ENCODING_NONE:
+        return NULL
     else:
         return tree.xmlGetCharEncodingName(enc)
 
@@ -471,8 +486,8 @@ cdef class _BaseParser:
         cdef int buffer_len
         cdef char* c_text
         py_buffer_len = python.PyUnicode_GET_DATA_SIZE(utext)
-        if py_buffer_len > python.INT_MAX:
-            text_utf = _utf8(utext)
+        if py_buffer_len > python.INT_MAX or _UNICODE_ENCODING is NULL:
+            text_utf = python.PyUnicode_AsUTF8String(utext)
             py_buffer_len = python.PyString_GET_SIZE(text_utf)
             return self._parseDoc(_cstr(text_utf), py_buffer_len, c_filename)
         buffer_len = py_buffer_len
