@@ -1770,7 +1770,8 @@ cdef class ElementDepthFirstIterator(_ElementTagMatcher):
 
     cdef xmlNode* _nextNodeMatchTag(self, xmlNode* c_node):
         tree.BEGIN_FOR_EACH_ELEMENT_FROM(self._top_node._c_node, c_node, 0)
-        if _tagMatches(c_node, self._href, self._name):
+        if c_node.type == tree.XML_ELEMENT_NODE and \
+               _tagMatches(c_node, self._href, self._name):
             return c_node
         tree.END_FOR_EACH_ELEMENT_FROM(c_node)
         return NULL
