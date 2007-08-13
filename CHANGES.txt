@@ -8,10 +8,20 @@ Under development
 Features added
 --------------
 
+* Serialising an ElementTree now includes any internal DTD subsets that are
+  part of the document, as well as comments and PIs that are siblings of the
+  root node.
+
 Bugs fixed
 ----------
 
 * Parsing with the ``no_network`` option could fail
+
+Other changes
+-------------
+
+* Serialising an Element no longer includes its comment and PI siblings (only
+  ElementTree serialisation includes them).
 
 
 1.3.3 (2007-07-26)
