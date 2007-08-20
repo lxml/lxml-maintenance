@@ -691,6 +691,17 @@ cdef object _encodeFilenameUTF8(object filename):
     else:
         raise TypeError, "Argument must be string or unicode."
 
+cdef object warnings
+import warnings
+class TagNameWarning(SyntaxWarning):
+    pass
+
+cdef int warnAboutTagName() except -1:
+    warnings.warn("Tag names must not contain ':', "
+                 "lxml 2.0 will enforce well-formed tag names "
+                 "as required by the XML specification.",
+                 TagNameWarning)
+
 cdef _getNsTag(tag):
     """Given a tag, find namespace URI and tag name.
     Return None for NS uri if no namespace URI available.
@@ -709,7 +720,7 @@ cdef _getNsTag(tag):
         if c_ns_end is NULL:
             raise ValueError, "Invalid tag name"
         if cstd.strchr(c_ns_end, c':') is not NULL:
-            raise ValueError, "Invalid tag name"
+            warnAboutTagName()
         nslen  = c_ns_end - c_tag
         taglen = python.PyString_GET_SIZE(tag) - nslen - 2
         if taglen == 0:
@@ -720,7 +731,7 @@ cdef _getNsTag(tag):
     elif python.PyString_GET_SIZE(tag) == 0:
         raise ValueError, "Empty tag name"
     elif cstd.strchr(c_tag, c':') is not NULL:
-        raise ValueError, "Invalid tag name"
+        warnAboutTagName()
     return ns, tag
 
 cdef object _namespacedName(xmlNode* c_node):

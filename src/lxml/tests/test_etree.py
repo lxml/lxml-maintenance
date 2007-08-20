@@ -8,7 +8,7 @@ test_elementtree
 """
 
 
-import unittest, copy, sys
+import unittest, copy, sys, warnings
 
 from common_imports import etree, StringIO, HelperTestCase, fileInTestDir
 from common_imports import SillyFileLike, canonicalize, doctest
@@ -31,6 +31,8 @@ except NameError:
         seq = list(seq)
         seq.sort()
         return seq
+
+warnings.simplefilter("error", etree.TagNameWarning)
 
 class ETreeOnlyTestCase(HelperTestCase):
     """Tests only for etree, not ElementTree"""
@@ -68,11 +70,14 @@ class ETreeOnlyTestCase(HelperTestCase):
 
     def test_element_name_colon(self):
         Element = self.etree.Element
-        self.assertRaises(ValueError, Element, 'p:name')
-        self.assertRaises(ValueError, Element, '{test}p:name')
+        self.assertRaises(self.etree.TagNameWarning,
+                          Element, 'p:name')
+        self.assertRaises(self.etree.TagNameWarning,
+                          Element, '{test}p:name')
 
         el = Element('name')
-        self.assertRaises(ValueError, setattr, el, 'tag', 'p:name')
+        self.assertRaises(self.etree.TagNameWarning,
+                          setattr, el, 'tag', 'p:name')
 
     def test_attribute_set(self):
         # ElementTree accepts arbitrary attribute values
