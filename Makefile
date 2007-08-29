@@ -51,7 +51,7 @@ ftest: ftest_inplace
 
 clean:
 	find . \( -name '*.o' -o -name '*.c' -o -name '*.so' -o -name '*.py[cod]' -o -name '*.dll' \) -exec rm -f {} \;
-	rm -rf build
+	rm -rf build doc/html/api
 
 realclean: clean
 	rm -f TAGS
