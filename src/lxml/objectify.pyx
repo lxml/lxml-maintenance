@@ -1651,7 +1651,7 @@ class ElementMaker(_ElementMaker):
         typemap[__builtin__.float]   = __add_text
         typemap[__builtin__.bool]    = __add_text
 
-        _ElementMaker.__init__(self, typemap, objectify_parser.makeelement)
+        _ElementMaker.__init__(self, typemap, makeelement=objectify_parser.makeelement)
 
 def __add_text(_Element elem not None, text):
     cdef tree.xmlNode* c_child
