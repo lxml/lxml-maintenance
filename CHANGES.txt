@@ -11,6 +11,9 @@ Features added
 Bugs fixed
 ----------
 
+* lxml.etree could crash when adding more than 10000 namespaces to a
+  document
+
 * lxml failed to serialise namespace declarations of elements other than the
   root node of a tree
 
