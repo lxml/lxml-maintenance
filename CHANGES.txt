@@ -11,6 +11,8 @@ Features added
 Bugs fixed
 ----------
 
+* Backported decref crash fix from 2.0
+
 * Well hidden free-while-in-use crash bug in ObjectPath
 
 

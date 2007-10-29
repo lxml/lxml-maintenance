@@ -16,14 +16,14 @@ cdef _Element getProxy(xmlNode* c_node):
 cdef int hasProxy(xmlNode* c_node):
     return c_node._private is not NULL
     
-cdef registerProxy(_Element proxy):
+cdef int _registerProxy(_Element proxy) except -1:
     """Register a proxy and type for the node it's proxying for.
     """
     cdef xmlNode* c_node
     # cannot register for NULL
     c_node = proxy._c_node
     if c_node is NULL:
-        return
+        return 0
     #print "registering for:", <int>proxy._c_node
     assert c_node._private is NULL, "double registering proxy!"
     c_node._private = <void*>proxy
@@ -31,14 +31,20 @@ cdef registerProxy(_Element proxy):
     proxy._gc_doc = <python.PyObject*>proxy._doc
     python.Py_INCREF(proxy._doc)
 
-cdef unregisterProxy(_Element proxy):
+cdef int _unregisterProxy(_Element proxy) except -1:
     """Unregister a proxy for the node it's proxying for.
     """
     cdef xmlNode* c_node
     c_node = proxy._c_node
     assert c_node._private is <void*>proxy, "Tried to unregister unknown proxy"
     c_node._private = NULL
-    python.Py_DECREF(<object>proxy._gc_doc)
+    return 0
+
+cdef _releaseProxy(_Element proxy):
+    """An additional DECREF for the document.
+    """
+    python.Py_XDECREF(proxy._gc_doc)
+    proxy._gc_doc = NULL
 
 ################################################################################
 # temporarily make a node the root node of its document
