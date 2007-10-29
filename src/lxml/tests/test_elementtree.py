@@ -18,10 +18,12 @@ class ETreeTestCaseBase(HelperTestCase):
     etree = None
     
     def setUp(self):
+        super(ETreeTestCaseBase, self).setUp()
         self._temp_dir = tempfile.mkdtemp()
         
     def tearDown(self):
         shutil.rmtree(self._temp_dir)
+        super(ETreeTestCaseBase, self).tearDown()
 
     def getTestFilePath(self, name):
         return os.path.join(self._temp_dir, name)

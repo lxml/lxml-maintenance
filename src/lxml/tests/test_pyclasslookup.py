@@ -34,6 +34,7 @@ class PyClassLookupTestCase(HelperTestCase):
 
     def tearDown(self):
         self.parser.setElementClassLookup(None)
+        super(PyClassLookupTestCase, self).tearDown()
 
     def _setClassLookup(self, lookup_function):
         class Lookup(PythonElementClassLookup):

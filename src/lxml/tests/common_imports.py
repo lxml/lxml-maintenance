@@ -1,7 +1,7 @@
 import unittest
 import os.path
 from StringIO import StringIO
-import re
+import re, gc
 
 from lxml import etree
 
@@ -30,6 +30,9 @@ except ImportError:
         return lambda obj: obj[item]
 
 class HelperTestCase(unittest.TestCase):
+    def tearDown(self):
+        gc.collect()
+
     def parse(self, text):
         f = StringIO(text)
         return etree.parse(f)

@@ -31,6 +31,7 @@ class ClassLookupTestCase(HelperTestCase):
         etree.setElementClassLookup()
         etree.Namespace("myNS").clear()
         etree.Namespace("otherNS").clear()
+        super(ClassLookupTestCase, self).tearDown()
 
     def test_namespace_lookup(self):
         class TestElement(etree.ElementBase):

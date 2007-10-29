@@ -10,7 +10,7 @@ import tempfile, os
 from common_imports import StringIO, etree, fileInTestDir
 from common_imports import SillyFileLike, HelperTestCase
 
-class HtmlParserTestCaseBase(HelperTestCase):
+class HtmlParserTestCase(HelperTestCase):
     """HTML parser test cases
     """
     etree = etree
@@ -21,6 +21,7 @@ class HtmlParserTestCaseBase(HelperTestCase):
 
     def tearDown(self):
         self.etree.setDefaultParser()
+        super(HtmlParserTestCase, self).tearDown()
 
     def test_module_HTML(self):
         element = self.etree.HTML(self.html_str)
@@ -111,7 +112,7 @@ class HtmlParserTestCaseBase(HelperTestCase):
 
 def test_suite():
     suite = unittest.TestSuite()
-    suite.addTests([unittest.makeSuite(HtmlParserTestCaseBase)])
+    suite.addTests([unittest.makeSuite(HtmlParserTestCase)])
     return suite
 
 if __name__ == '__main__':

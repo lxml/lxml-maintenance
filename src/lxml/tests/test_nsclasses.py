@@ -21,6 +21,7 @@ class ETreeNamespaceClassesTestCase(HelperTestCase):
             return u'bluff'
 
     def setUp(self):
+        super(ETreeNamespaceClassesTestCase, self).setUp()
         parser = etree.XMLParser()
         parser.setElementClassLookup(
             etree.ElementNamespaceClassLookup() )
@@ -28,6 +29,7 @@ class ETreeNamespaceClassesTestCase(HelperTestCase):
 
     def tearDown(self):
         etree.setDefaultParser()
+        super(ETreeNamespaceClassesTestCase, self).tearDown()
 
     def test_registry(self):
         ns = etree.Namespace(u'ns01')

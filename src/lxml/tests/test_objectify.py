@@ -60,6 +60,7 @@ class ObjectifyTestCase(HelperTestCase):
         return self.etree.XML(xml, self.parser)
 
     def setUp(self):
+        super(ObjectifyTestCase, self).setUp()
         self.parser = self.etree.XMLParser(remove_blank_text=True)
         lookup = etree.ElementNamespaceClassLookup(
             objectify.ObjectifyElementClassLookup() )
@@ -73,6 +74,7 @@ class ObjectifyTestCase(HelperTestCase):
     def tearDown(self):
         self.etree.Namespace("otherNS").clear()
         objectify.setPytypeAttributeTag()
+        super(ObjectifyTestCase, self).tearDown()
 
     def test_element_nsmap_default(self):
         elt = objectify.Element("test")
