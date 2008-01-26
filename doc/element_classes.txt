@@ -255,7 +255,7 @@ per-parser setup.
 
 
 Tree based element class lookup in Python
-.........................................
+-----------------------------------------
 
 Taking more elaborate decisions than allowed by the custom scheme is difficult
 to achieve in pure Python.  It would require access to the tree - before the
