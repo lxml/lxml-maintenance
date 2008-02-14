@@ -1,5 +1,10 @@
+# --------------------------------------------------------------------
+# The ElementTree toolkit is
+# Copyright (c) 1999-2004 by Fredrik Lundh
+# --------------------------------------------------------------------
+
 """
-HTML specialisation of ``builder.py`` by Fredrik Lundh
+A set of HTML generator tags for building HTML documents.
 
 Usage::
 

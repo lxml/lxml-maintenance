@@ -1,3 +1,39 @@
+"""
+A whole-tree Element class lookup scheme for `lxml.etree`.
+
+This class lookup scheme allows access to the entire XML tree in
+read-only mode.  To use it, let a class inherit from
+`PythonElementClassLookup` and re-implement the ``lookup(self, doc,
+root)`` method:
+
+    >>> from lxml import etree, pyclasslookup
+    >>>
+    >>> class MyElementClass(etree.ElementBase):
+    ...     honkey = True
+    ...
+    >>> class MyLookup(pyclasslookup.PythonElementClassLookup):
+    ...     def lookup(self, doc, root):
+    ...         if root.tag == "sometag":
+    ...             return MyElementClass
+    ...         else:
+    ...             for child in root:
+    ...                 if child.tag == "someothertag":
+    ...                     return MyElementClass
+    ...         # delegate to default
+    ...         return None
+
+Note that the API of the Element objects is not complete.  It is
+purely read-only and does not support all features of the normal
+`lxml.etree` API (such as XPath, extended slicing or some iteration
+methods).
+
+Also, you cannot wrap such a read-only Element in an ElementTree, and
+you must take care not to keep a reference to them outside of the
+`lookup()` method.
+
+See http://codespeak.net/lxml/element_classes.html
+"""
+
 from etreepublic cimport _Document, _Element, ElementBase
 from etreepublic cimport ElementClassLookup, FallbackElementClassLookup
 from etreepublic cimport elementFactory, import_lxml__etree
@@ -17,6 +53,7 @@ import_lxml__etree()
 __version__ = etree.__version__
 
 cdef class _ElementProxy:
+    "The main read-only Element proxy class (for internal use only!)."
     cdef tree.xmlNode* _c_node
     cdef object _source_proxy
     cdef object _dependent_proxies
@@ -128,6 +165,21 @@ cdef class _ElementProxy:
         c_node = cetree.findChildBackwards(self._c_node, 0)
         return c_node != NULL
 
+    def __iter__(self):
+        return iter(self.getchildren())
+
+    def iterchildren(self, tag=None, *, reversed=False):
+        """iterchildren(self, tag=None, reversed=False)
+
+        Iterate over the children of this element.
+        """
+        children = self.getchildren()
+        if tag is not None:
+            children = [ el for el in children if el.tag == tag ]
+        if reversed:
+            children = children[::-1]
+        return iter(children)
+
     def get(self, key, default=None):
         """Gets an element attribute.
         """
@@ -155,7 +207,7 @@ cdef class _ElementProxy:
         self._assertNode()
         return cetree.collectAttributes(self._c_node, 3)
 
-    def getchildren(self):
+    cpdef getchildren(self):
         """Returns all subelements. The elements are returned in document
         order.
         """
@@ -201,15 +253,21 @@ cdef class _ElementProxy:
             return _newProxy(self._source_proxy, c_node)
         return None
 
+
+cdef extern from "etree_defs.h":
+    # macro call to 't->tp_new()' for fast instantiation
+    cdef _ElementProxy NEW_PROXY "PY_NEW" (object t)
+
 cdef _ElementProxy _newProxy(_ElementProxy sourceProxy, tree.xmlNode* c_node):
     cdef _ElementProxy el
-    el = _ElementProxy()
+    el = NEW_PROXY(_ElementProxy)
     el._c_node = c_node
     if sourceProxy is None:
-        sourceProxy = el
-        el._dependent_proxies = []
-    el._source_proxy = sourceProxy
-    python.PyList_Append(sourceProxy._dependent_proxies, el)
+        el._source_proxy = el
+        el._dependent_proxies = [el]
+    else:
+        el._source_proxy = sourceProxy
+        python.PyList_Append(sourceProxy._dependent_proxies, el)
     return el
 
 cdef _freeProxies(_ElementProxy sourceProxy):
@@ -238,7 +296,8 @@ cdef object _getAttributeValue(tree.xmlNode* c_node, key, default):
 
 
 cdef class PythonElementClassLookup(FallbackElementClassLookup):
-    """Element class lookup based on a subclass method.
+    """PythonElementClassLookup(self, fallback=None)
+    Element class lookup based on a subclass method.
 
     To use it, inherit from this class and override the lookup method to
     lookup the element class for a node::
@@ -257,6 +316,10 @@ cdef class PythonElementClassLookup(FallbackElementClassLookup):
         self._lookup_function = _lookup_class
 
     def lookup(self, doc, element):
+        """lookup(self, doc, element)
+
+        Override this method to implement your own lookup scheme.
+        """
         return None
 
 cdef object _lookup_class(state, _Document doc, tree.xmlNode* c_node):

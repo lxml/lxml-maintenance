@@ -1,3 +1,6 @@
+"""The ``lxml.html`` tool set for HTML handling.
+"""
+
 import threading
 import re
 import urlparse
@@ -5,7 +8,7 @@ import copy
 from lxml import etree
 from lxml.html import defs
 from lxml import cssselect
-from lxml.html.setmixin import SetMixin
+from lxml.html._setmixin import SetMixin
 try:
     from UserDict import DictMixin
 except ImportError:
@@ -818,7 +821,8 @@ class InputGetter(object):
     def keys(self):
         names = sets.Set()
         for el in self:
-            names.add(el.name)
+            if el.name is not None:
+                names.add(el.name)
         return list(names)
 
     def __iter__(self):

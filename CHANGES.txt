@@ -2,6 +2,46 @@
 lxml changelog
 ==============
 
+2.0.1 (2008-02-13)
+==================
+
+Features added
+--------------
+
+* Child iteration in ``lxml.pyclasslookup``.
+
+* Loads of new docstrings reflect the signature of functions and
+  methods to make them visible in API docs and ``help()``
+
+Bugs fixed
+----------
+
+* The module ``lxml.html.builder`` was duplicated as
+  ``lxml.htmlbuilder``
+
+* Form elements would return None for ``form.fields.keys()`` if there
+  was an unnamed input field.  Now unnamed input fields are completely
+  ignored.
+
+* Setting an element slice in objectify could insert slice-overlapping
+  elements at the wrong position.
+
+Other changes
+-------------
+
+* The generated API documentation was cleaned up and disburdened from
+  non-public classes etc.
+
+* The previously public module ``lxml.html.setmixin`` was renamed to
+  ``lxml.html._setmixin`` as it is not an official part of lxml.  If
+  you want to use it, feel free to copy it over to your own source
+  base.
+
+* Passing ``--with-xslt-config=/path/to/xslt-config`` to setup.py will
+  override the ``xslt-config`` script that is used to determine the C
+  compiler options.
+
+
 2.0 (2008-02-01)
 ================
 

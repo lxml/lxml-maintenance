@@ -23,22 +23,31 @@ with a script called ``ez_setup.py`` that can be used to install them.
 Cython
 ------
 
-The lxml.etree and lxml.objectify modules are written in Cython_.  Since we
-distribute the Cython-generated .c files with lxml releases, however, you do
-not need Cython to build lxml from the normal release sources.
-
+.. _EasyInstall: http://peak.telecommunity.com/DevCenter/EasyInstall
 .. _Cython: http://www.cython.org
 
-If you are interested in building lxml from a Subversion checkout or want to
-be an lxml developer, you do need a working Cython installation.  You can use
-EasyInstall_ to install it::
+The lxml.etree and lxml.objectify modules are written in Cython_.
+Since we distribute the Cython-generated .c files with lxml releases,
+however, you do not need Cython to build lxml from the normal release
+sources.  We even encourage you to *not install Cython* for a normal
+release build, as the generated C code can vary quite heavily between
+Cython versions, which may or may not generate correct code for lxml.
+The pre-generated release sources were tested and therefore are known
+to work.
 
-    easy_install Cython==0.9.6.11
+So, if you want a reliable build of lxml, we suggest to a) use a
+source release of lxml and b) disable or uninstall Cython for the
+build.
 
-.. _EasyInstall: http://peak.telecommunity.com/DevCenter/EasyInstall
+*Only* if you are interested in building lxml from a Subversion
+checkout (e.g. to test a bug fix that has not been release yet) or if
+want to be an lxml developer, then you do need a working Cython
+installation.  You can use EasyInstall_ to install it::
 
-lxml currently requires at least Cython 0.9.6.11, but later versions
-should work.
+    easy_install Cython==0.9.6.11b
+
+lxml currently requires Cython 0.9.6.11b, later versions were not
+tested.
 
 
 Subversion
@@ -79,9 +88,13 @@ or, in Unix-like environments::
 
 If you get errors about missing header files (e.g. ``libxml/xmlversion.h``)
 then you need to make sure the development packages of both libxml2
-and libxslt are properly installed.  If this doesn't help, you may
-have to add the location of the header files to the include path
-like::
+and libxslt are properly installed.  Try passing the following option to
+setup.py to make sure the right config is found::
+
+  python setup.py build --with-xslt-config=/path/to/xslt-config
+
+If this doesn't help, you may have to add the location of the header
+files to the include path like::
 
   python setup.py build_ext -i  -I /usr/include/libxml2
 
@@ -165,15 +178,28 @@ to be hard to get libraries set up for exclusive usage that Mac-OS X ships in
 an older version.  The result can be segfaults on this platform that are hard
 to track down.
 
-To make sure the newer libxml2 and libxslt versions are used (e.g. under
-fink), you should add the directory where you installed the libraries to the
-``DYLD_LIBRARY_PATH`` environment variable.  This seems to fix a lot of
-problems for users.
+To make sure the newer libxml2 and libxslt versions (e.g. those
+provided by fink or macports) are used at *build time*, you must take
+care that the script ``xslt-config`` is found from the newly installed
+version when running the build setup.  The system libraries also
+provide this script, but the new one must come first in the PATH.  The
+best way to make sure the right version is used is by passing the path
+to the script as an option to setup.py::
 
-Alternatively, you can build lxml statically.  A way to do this on MS Windows
-is described in the next section, but it should be easy to adapt it for
-Mac-OS.  That way, you can always be sure you use the versions you compiled
-lxml with, regardless of the runtime environement.
+  python setup.py build --with-xslt-config=/path/to/xslt-config
+
+To make sure the newer libxml2 and libxslt versions are used at
+*runtime*, you should add *all* directories where the newer libraries
+are installed (i.e. libxml2, libxslt and libexslt) to the
+``DYLD_LIBRARY_PATH`` environment variable when you use lxml (i.e. not
+only at build time).  This seems to fix a lot of problems for users.
+
+Please read this thread about `experiences with MacOS-X`_ if you
+encounter problems.  It also has a `buildout for lxml`_ that you can
+use.
+
+.. _`experiences with MacOS-X`: http://thread.gmane.org/gmane.comp.python.lxml.devel/3290/focus=3290
+.. _`buildout for lxml`: http://thread.gmane.org/gmane.comp.python.lxml.devel/3290/focus=3297
 
 
 Static linking on Windows
