@@ -88,7 +88,11 @@ cdef class _LogEntry:
 
     property type_name:
         def __get__(self):
-            return ErrorTypes._getName(self.type, "unknown")
+            if self.domain == ErrorDomains.RELAXNGV:
+                getName = RelaxNGErrorTypes._getName
+            else:
+                getName = ErrorTypes._getName
+            return getName(self.type, "unknown")
 
     property level_name:
         def __get__(self):
@@ -523,9 +527,10 @@ cdef void _receiveXSLTError(void* c_log_handler, char* msg, ...) nogil:
 cdef void __initErrorConstants():
     "Called at setup time to parse the constants and build the classes below."
     find_constants = re.compile(r"\s*([a-zA-Z0-9_]+)\s*=\s*([0-9]+)").findall
-    const_defs = ((ErrorLevels,  __ERROR_LEVELS),
-                  (ErrorDomains, __ERROR_DOMAINS),
-                  (ErrorTypes,   __ERROR_TYPES))
+    const_defs = ((ErrorLevels,          __ERROR_LEVELS),
+                  (ErrorDomains,         __ERROR_DOMAINS),
+                  (ErrorTypes,           __PARSER_ERROR_TYPES),
+                  (RelaxNGErrorTypes,    __RELAXNG_ERROR_TYPES))
     for cls, constant_tuple in const_defs:
         reverse_dict = {}
         cls._names   = reverse_dict
@@ -537,6 +542,7 @@ cdef void __initErrorConstants():
                 python.PyObject_SetAttr(cls, name, value)
                 python.PyDict_SetItem(reverse_dict, value, name)
 
+
 class ErrorLevels:
     "Libxml2 error levels"
 
@@ -545,6 +551,9 @@ class ErrorDomains:
 
 class ErrorTypes:
     "Libxml2 error types"
+
+class RelaxNGErrorTypes:
+    "Libxml2 RelaxNG error types"
 
 # --- BEGIN: GENERATED CONSTANTS ---
 
@@ -596,8 +605,8 @@ MODULE=26
 I18N=27
 """,)
 
-cdef object __ERROR_TYPES
-__ERROR_TYPES = ("""\
+cdef object __PARSER_ERROR_TYPES
+__PARSER_ERROR_TYPES = ("""\
 ERR_OK=0
 ERR_INTERNAL_ERROR=1
 ERR_NO_MEMORY=2
@@ -1342,6 +1351,50 @@ I18N_CONV_FAILED=6003
 I18N_NO_OUTPUT=6004
 CHECK_=6005
 CHECK_X=6006
+""",)
+
+cdef object __RELAXNG_ERROR_TYPES
+__RELAXNG_ERROR_TYPES = ("""\
+RELAXNG_OK=0
+RELAXNG_ERR_MEMORY=1
+RELAXNG_ERR_TYPE=2
+RELAXNG_ERR_TYPEVAL=3
+RELAXNG_ERR_DUPID=4
+RELAXNG_ERR_TYPECMP=5
+RELAXNG_ERR_NOSTATE=6
+RELAXNG_ERR_NODEFINE=7
+RELAXNG_ERR_LISTEXTRA=8
+RELAXNG_ERR_LISTEMPTY=9
+RELAXNG_ERR_INTERNODATA=10
+RELAXNG_ERR_INTERSEQ=11
+RELAXNG_ERR_INTEREXTRA=12
+RELAXNG_ERR_ELEMNAME=13
+RELAXNG_ERR_ATTRNAME=14
+RELAXNG_ERR_ELEMNONS=15
+RELAXNG_ERR_ATTRNONS=16
+RELAXNG_ERR_ELEMWRONGNS=17
+RELAXNG_ERR_ATTRWRONGNS=18
+RELAXNG_ERR_ELEMEXTRANS=19
+RELAXNG_ERR_ATTREXTRANS=20
+RELAXNG_ERR_ELEMNOTEMPTY=21
+RELAXNG_ERR_NOELEM=22
+RELAXNG_ERR_NOTELEM=23
+RELAXNG_ERR_ATTRVALID=24
+RELAXNG_ERR_CONTENTVALID=25
+RELAXNG_ERR_EXTRACONTENT=26
+RELAXNG_ERR_INVALIDATTR=27
+RELAXNG_ERR_DATAELEM=28
+RELAXNG_ERR_VALELEM=29
+RELAXNG_ERR_LISTELEM=30
+RELAXNG_ERR_DATATYPE=31
+RELAXNG_ERR_VALUE=32
+RELAXNG_ERR_LIST=33
+RELAXNG_ERR_NOGRAMMAR=34
+RELAXNG_ERR_EXTRADATA=35
+RELAXNG_ERR_LACKDATA=36
+RELAXNG_ERR_INTERNAL=37
+RELAXNG_ERR_ELEMWRONG=38
+RELAXNG_ERR_TEXTWRONG=39
 """,)
 # --- END: GENERATED CONSTANTS ---
 
