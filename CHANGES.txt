@@ -8,8 +8,16 @@ lxml changelog
 Features added
 --------------
 
+* Support passing ``base_url`` to file parser functions to override
+  the filename of the file(-like) object.
+
 Bugs fixed
 ----------
+
+* The prefix for objectify's pytype namespace was missing from the set
+  of default prefixes.
+
+* Memory leak in Schematron (fixed only for libxml2 2.6.31+).
 
 * Error type names in RelaxNG were reported incorrectly.
 
@@ -17,6 +25,14 @@ Bugs fixed
 
 Other changes
 -------------
+
+* Enabled doctests for some Python modules (especially ``lxml.html``).
+
+* Add a ``method`` argument to ``lxml.html.tostring``
+  (``method="xml"`` for XHTML output).
+
+* Make it clearer that methods like ``lxml.html.fromstring`` take a
+  ``base_url`` argument.
 
 
 2.0.1 (2008-02-13)
