@@ -2,6 +2,19 @@
 lxml changelog
 ==============
 
+2.0.3 (Under development)
+=========================
+
+Features added
+--------------
+
+Bugs fixed
+----------
+
+Other changes
+-------------
+
+
 2.0.2 (2008-02-22)
 ==================
 
