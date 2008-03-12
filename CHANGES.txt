@@ -11,6 +11,9 @@ Features added
 Bugs fixed
 ----------
 
+* Attribute assignment of custom PyTypes in objectify could fail to
+  correctly serialise the value to a string.
+
 Other changes
 -------------
 
