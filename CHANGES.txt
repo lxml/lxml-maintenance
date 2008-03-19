@@ -8,8 +8,16 @@ lxml changelog
 Features added
 --------------
 
+* soupparser.parse() allows passing keyword arguments on to
+  BeautifulSoup.
+
+* ``fromstring()`` method in ``lxml.html.soupparser``.
+
 Bugs fixed
 ----------
+
+* The BeautifulSoup parser (soupparser.py) did not replace entities,
+  which made them turn up in text content.
 
 * Attribute assignment of custom PyTypes in objectify could fail to
   correctly serialise the value to a string.
