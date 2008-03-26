@@ -19,22 +19,16 @@ The functions ``fromstring()`` and ``parse()`` behave as known from
 ElementTree.  The first returns a root Element, the latter returns an
 ElementTree.
 
-Here is a document full of tag soup, similar to, but not quite like, HTML:
-
-.. sourcecode:: pycon
+Here is a document full of tag soup, similar to, but not quite like, HTML::
 
     >>> tag_soup = '<meta><head><title>Hello</head<body onload=crash()>Hi all<p>'
 
-all you need to do is pass it to the ``fromstring()`` function:
-
-.. sourcecode:: pycon
+all you need to do is pass it to the ``fromstring()`` function::
 
     >>> from lxml.html.soupparser import fromstring
     >>> root = fromstring(tag_soup)
 
-To see what we have here, you can serialise it:
-
-.. sourcecode:: pycon
+To see what we have here, you can serialise it::
 
     >>> from lxml.etree import tostring
     >>> print tostring(root, pretty_print=True),
@@ -54,9 +48,7 @@ To control which Element implementation is used, you can pass a
 By default, this is based on the HTML parser defined in ``lxml.html``.
 
 By default, the BeautifulSoup parser also replaces the entities it
-finds by their character equivalent.
-
-.. sourcecode:: pycon
+finds by their character equivalent::
 
     >>> tag_soup = '<body>&copy;&euro;&#45;&#245;&#445;<p>'
     >>> body = fromstring(tag_soup).find('.//body')
@@ -64,9 +56,7 @@ finds by their character equivalent.
     u'\xa9\u20ac-\xf5\u01bd'
 
 If you want them back on the way out, you can serialise with the
-'html' method, which will always use escaping for safety reasons:
-
-.. sourcecode:: pycon
+'html' method, which will always use escaping for safety reasons::
 
     >>> tostring(body, method="html")
     '<body>&#xA9;&#x20AC;-&#xF5;&#x1BD;<p></p></body>'
@@ -78,9 +68,7 @@ If you want them back on the way out, you can serialise with the
     u'<body>&#xA9;&#x20AC;-&#xF5;&#x1BD;<p></p></body>'
 
 Otherwise, when serialising to XML, only the plain ASCII encoding will
-escape non-ASCII characters:
-
-.. sourcecode:: pycon
+escape non-ASCII characters::
 
     >>> tostring(body)
     '<body>&#169;&#8364;-&#245;&#445;<p/></body>'
