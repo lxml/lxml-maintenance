@@ -16,6 +16,9 @@ Features added
 Bugs fixed
 ----------
 
+* ``lxml.html.diff`` didn't treat empty tags properly (e.g.,
+  ``<br>``).
+
 * Handle entity replacements correctly in target parser.
 
 * Crash when using ``iterparse()`` with XML Schema validation.
