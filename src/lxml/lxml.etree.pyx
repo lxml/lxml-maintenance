@@ -1643,7 +1643,7 @@ cdef public class _ElementTree [ type LxmlElementTreeType,
         """
         self._assertHasRoot()
         root = self.getroot()
-        if path[:1] == "/":
+        if _isString(path) and path[:1] == "/":
             path = "." + path
         return root.find(path)
 
@@ -1655,7 +1655,7 @@ cdef public class _ElementTree [ type LxmlElementTreeType,
         """
         self._assertHasRoot()
         root = self.getroot()
-        if path[:1] == "/":
+        if _isString(path) and path[:1] == "/":
             path = "." + path
         return root.findtext(path, default)
 
@@ -1667,7 +1667,7 @@ cdef public class _ElementTree [ type LxmlElementTreeType,
         """
         self._assertHasRoot()
         root = self.getroot()
-        if path[:1] == "/":
+        if _isString(path) and path[:1] == "/":
             path = "." + path
         return root.findall(path)
 
@@ -1679,7 +1679,7 @@ cdef public class _ElementTree [ type LxmlElementTreeType,
         """
         self._assertHasRoot()
         root = self.getroot()
-        if path[:1] == "/":
+        if _isString(path) and path[:1] == "/":
             path = "." + path
         return root.iterfind(path)
 
