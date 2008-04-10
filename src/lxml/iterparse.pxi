@@ -325,6 +325,7 @@ cdef class iterparse(_BaseParser):
                              None, filename, encoding)
 
         context = <_IterparseContext>self._getPushParserContext()
+        __GLOBAL_PARSER_CONTEXT.initParserDict(context._c_ctxt)
         context._setEventFilter(events, tag)
         context.prepare()
         # parser will not be unlocked - no other methods supported
