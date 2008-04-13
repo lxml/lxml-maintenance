@@ -11,6 +11,8 @@ Features added
 Bugs fixed
 ----------
 
+* Hanging thread in conjunction with GTK threading.
+
 * Crash bug in iterparse when moving elements into other documents.
 
 * HTML elements' ``.cssselect()`` method was broken.
