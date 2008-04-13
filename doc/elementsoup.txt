@@ -3,21 +3,27 @@ BeautifulSoup Parser
 ====================
 
 BeautifulSoup_ is a Python package that parses broken HTML.  While libxml2
-(and thus lxml) can also parse broken HTML, BeautifulSoup is much more
+(and thus lxml) can also parse broken HTML, BeautifulSoup is a bit more
 forgiving and has superiour `support for encoding detection`_.
 
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
 .. _`support for encoding detection`: http://www.crummy.com/software/BeautifulSoup/documentation.html#Beautiful%20Soup%20Gives%20You%20Unicode,%20Dammit
+.. _ElementSoup: http://effbot.org/zone/element-soup.htm
 
 lxml can benefit from the parsing capabilities of BeautifulSoup
 through the ``lxml.html.soupparser`` module.  It provides three main
 functions: ``fromstring()`` and ``parse()`` to parse a string or file
-using BeautifulSoup, and `convert_tree()` to convert an existing
+using BeautifulSoup, and ``convert_tree()`` to convert an existing
 BeautifulSoup tree into a list of top-level Elements.
 
 The functions ``fromstring()`` and ``parse()`` behave as known from
 ElementTree.  The first returns a root Element, the latter returns an
 ElementTree.
+
+There is also a legacy module called ``lxml.html.ElementSoup``, which
+mimics the interface provided by ElementTree's own ElementSoup_
+module.  Note that the ``soupparser`` module was added in lxml 2.0.3.
+Previous versions of lxml 2.0.x only have the ``ElementSoup`` module.
 
 Here is a document full of tag soup, similar to, but not quite like, HTML::
 
@@ -46,6 +52,10 @@ already, right?  BeautifulSoup did its best, and so now it's a tree.
 To control which Element implementation is used, you can pass a
 ``makeelement`` factory function to ``parse()`` and ``fromstring()``.
 By default, this is based on the HTML parser defined in ``lxml.html``.
+
+
+Entity handling
+===============
 
 By default, the BeautifulSoup parser also replaces the entities it
 finds by their character equivalent::
@@ -83,4 +93,41 @@ There is also a legacy module called ``lxml.html.ElementSoup``, which
 mimics the interface provided by ElementTree's own ElementSoup_
 module.
 
-.. _ElementSoup: http://effbot.org/zone/element-soup.htm
+
+Using soupparser as a fallback
+==============================
+
+The downside of using this parser is that it is `much slower`_ than
+the HTML parser of lxml.  So if performance matters, you might want to
+consider using ``soupparser`` only as a fallback for certain cases.
+
+.. _`much slower`: http://blog.ianbicking.org/2008/03/30/python-html-parser-performance/
+
+One common problem of lxml's parser is that it might not get the
+encoding right in cases where the document contains a ``<meta>`` tag
+at the wrong place.  In this case, you can exploit the fact that lxml
+serialises much faster than most other HTML libraries for Python.
+Just serialise the document to unicode and if that gives you an
+exception, re-parse it with BeautifulSoup to see if that works
+better::
+
+    >>> tag_soup = '''\
+    ... <meta http-equiv="Content-Type"
+    ...       content="text/html;charset=utf-8" />
+    ... <html>
+    ...   <head>
+    ...     <title>Hello W\xc3\xb6rld!</title>
+    ...   </head>
+    ...   <body>Hi all</body>
+    ... </html>'''
+
+    >>> import lxml.html
+    >>> import lxml.html.soupparser
+
+    >>> root = lxml.html.fromstring(tag_soup)
+    >>> try:
+    ...     ignore = tostring(root, encoding=unicode)
+    ... except UnicodeDecodeError:
+    ...     root = lxml.html.soupparser.fromstring(tag_soup)
+    ...     # try again, but don't catch the exception this time
+    ...     ignore = tostring(root, encoding=unicode)
