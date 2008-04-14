@@ -2,6 +2,21 @@
 lxml changelog
 ==============
 
+Under development
+=================
+
+Features added
+--------------
+
+Bugs fixed
+----------
+
+* Memory leak in Schematron with libxml2 >= 2.6.31.
+
+Other changes
+-------------
+
+
 2.0.4 (2008-04-13)
 ==================
 
