@@ -8,6 +8,11 @@ cdef extern from "libxslt/xsltconfig.h":
     cdef int LIBXSLT_VERSION
 
 cdef extern from "libxslt/xsltInternals.h":
+    ctypedef enum xsltTransformState:
+        XSLT_STATE_OK       # 0
+        XSLT_STATE_ERROR    # 1
+        XSLT_STATE_STOPPED  # 2
+
     ctypedef struct xsltDocument:
         xmlDoc* doc
 
@@ -22,6 +27,7 @@ cdef extern from "libxslt/xsltInternals.h":
         void* _private
         xmlDict* dict
         int profile
+        xsltTransformState state
 
     cdef xsltStylesheet* xsltParseStylesheetDoc(xmlDoc* doc) nogil
     cdef void xsltFreeStylesheet(xsltStylesheet* sheet) nogil
