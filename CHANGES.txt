@@ -11,6 +11,8 @@ Features added
 Bugs fixed
 ----------
 
+* Resolving to a filename in custom resolvers didn't work.
+
 * Memory leak in Schematron with libxml2 >= 2.6.31.
 
 Other changes
