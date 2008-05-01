@@ -172,7 +172,7 @@ version.
 .. _`this key`: pubkey.asc
 .. _`Older versions`: #old-versions
 .. _`installation instructions`: installation.html
- .. _`how to build lxml from source`: build.html
+.. _`how to build lxml from source`: build.html
 .. _`Subversion repository`: http://codespeak.net/svn/lxml/
 .. _`Subversion history`: https://codespeak.net/viewvc/lxml/
 .. _`latest CHANGES`: http://codespeak.net/svn/lxml/trunk/CHANGES.txt
@@ -214,6 +214,8 @@ obstacle to using lxml in your codebase.
 
 Old Versions
 ------------
+
+.. _`PDF documentation`: lxmldoc-2.0.5.pdf
 
 * `lxml 2.0.4`_, released 2008-04-13 (`changes for 2.0.4`_)
 
