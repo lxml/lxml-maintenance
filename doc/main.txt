@@ -47,6 +47,10 @@ the FAQ_.
 Documentation
 -------------
 
+The complete lxml documentation is available for download as `PDF
+documentation`_. The HTML documentation from this web site is part of
+the normal `source download <#download>`_.
+
 * ElementTree:
 
   * `ElementTree API`_
@@ -140,32 +144,37 @@ Index`_ (PyPI).  It has the source that compiles on various platforms.
 The source distribution is signed with `this key`_.  Binary builds for
 MS Windows usually become available through PyPI a few days after a
 source release.  If you can't wait, consider trying a less recent
-version first.
-
-.. _`lxml at the Python Package Index`: http://pypi.python.org/pypi/lxml/
-.. _`this key`: pubkey.asc
+release version first.
 
 The latest version is `lxml 2.0.5`_, released 2008-04-13
 (`changes for 2.0.5`_).  `Older versions`_ are listed below.
 
-.. _`Older versions`: #old-versions
-
 Please take a look at the `installation instructions`_!
 
-.. _`installation instructions`: installation.html
+This complete web site (including the generated API documentation) is
+part of the source distribution, so if you want to download the
+documentation for offline use, take the source archive and copy the
+``doc/html`` directory out of the source tree.
 
 It's also possible to check out the latest development version of lxml
 from svn directly, using a command like this::
 
   svn co http://codespeak.net/svn/lxml/trunk lxml
 
-You can also `browse it through the web`_.  Please read `how to build lxml
-from source`_ first.  The `latest CHANGES`_ of the developer version are also
-accessible.  You can check there if a bug you found has been fixed or a
-feature you want has been implemented in the latest trunk version.
+You can also browse the `Subversion repository`_ through the web, or
+take a look at the `Subversion history`_.  Please read `how to build lxml
+from source`_ first.  The `latest CHANGES`_ of the developer version
+are also accessible.  You can check there if a bug you found has been
+fixed or a feature you want has been implemented in the latest trunk
+version.
 
-.. _`how to build lxml from source`: build.html
-.. _`browse it through the web`: http://codespeak.net/svn/lxml
+.. _`lxml at the Python Package Index`: http://pypi.python.org/pypi/lxml/
+.. _`this key`: pubkey.asc
+.. _`Older versions`: #old-versions
+.. _`installation instructions`: installation.html
+ .. _`how to build lxml from source`: build.html
+.. _`Subversion repository`: http://codespeak.net/svn/lxml/
+.. _`Subversion history`: https://codespeak.net/viewvc/lxml/
 .. _`latest CHANGES`: http://codespeak.net/svn/lxml/trunk/CHANGES.txt
 
 
@@ -178,7 +187,7 @@ You can search the archive with Gmane_ or Google_.
 
 .. _`mailing list`: http://codespeak.net/mailman/listinfo/lxml-dev
 .. _Gmane: http://blog.gmane.org/gmane.comp.python.lxml.devel
-.. _Google: http://www.google.com/webhp?q=site:codespeak.net/mailman/listinfo/lxml-dev%20
+.. _Google: http://www.google.com/webhp?q=site:codespeak.net%2Fmailman%2Flistinfo%2Flxml-dev+
 
 
 Bug tracker
@@ -189,7 +198,7 @@ lxml, please file a bug report there.  If you are not sure whether some
 unexpected behaviour of lxml is a bug or not, please ask on the `mailing
 list`_ first.  Do not forget to search the archive (e.g. with Gmane_)!
 
-.. _`launchpad bug tracker`: https://launchpad.net/lxml
+.. _`launchpad bug tracker`: https://launchpad.net/lxml/
 
 
 License

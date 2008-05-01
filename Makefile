@@ -2,6 +2,7 @@ PYTHON?=python
 TESTFLAGS=-p -v
 TESTOPTS=
 SETUPFLAGS=
+LXMLVERSION=`cat version.txt`
 
 all: inplace
 
@@ -40,16 +41,39 @@ ftest_build: build
 ftest_inplace: inplace
 	$(PYTHON) test.py -f $(TESTFLAGS) $(TESTOPTS)
 
-html: inplace
-	mkdir -p doc/html
-	PYTHONPATH=src $(PYTHON) doc/mkhtml.py doc/html . `cat version.txt`
+apihtml: inplace
 	rm -fr doc/html/api
 	@[ -x "`which epydoc`" ] \
 		&& (cd src && echo "Generating API docs ..." && \
 			PYTHONPATH=. epydoc -v --docformat "restructuredtext en" \
 			-o ../doc/html/api --no-private --exclude='[.]html[.]tests|[.]_' \
-			--name lxml --url http://codespeak.net/lxml/ lxml/) \
+			--exclude-introspect='[.]usedoctest' \
+			--name "lxml API" --url http://codespeak.net/lxml/ lxml/) \
 		|| (echo "not generating epydoc API documentation")
+
+html: inplace apihtml
+	PYTHONPATH=src $(PYTHON) doc/mkhtml.py doc/html . ${LXMLVERSION}
+
+apipdf: inplace
+	rm -fr doc/pdf
+	mkdir -p doc/pdf
+	@[ -x "`which epydoc`" ] \
+		&& (cd src && echo "Generating API docs ..." && \
+			PYTHONPATH=. epydoc -v --latex --docformat "restructuredtext en" \
+			-o ../doc/pdf --no-private --exclude='([.]html)?[.]tests|[.]_' \
+			--exclude-introspect='html[.]clean|[.]usedoctest' \
+			--name "lxml API" --url http://codespeak.net/lxml/ lxml/) \
+		|| (echo "not generating epydoc API documentation")
+
+pdf: apipdf
+	$(PYTHON) doc/mklatex.py doc/pdf . ${LXMLVERSION}
+	(cd doc/pdf && pdflatex lxmldoc.tex \
+		    && pdflatex lxmldoc.tex \
+		    && pdflatex lxmldoc.tex)
+	@pdfopt doc/pdf/lxmldoc.pdf doc/pdf/lxmldoc-${LXMLVERSION}.pdf
+	@echo "PDF available as doc/pdf/lxmldoc-${LXMLVERSION}.pdf"
+
+# Two pdflatex runs are needed to build the correct Table of contents.
 
 test: test_inplace
 
@@ -65,7 +89,12 @@ clean:
 	find . \( -name '*.o' -o -name '*.so' -o -name '*.py[cod]' -o -name '*.dll' \) -exec rm -f {} \;
 	rm -rf build
 
-realclean: clean
+docclean:
+	rm -f doc/html/*.html
+	rm -fr doc/html/api
+	rm -fr doc/pdf
+
+realclean: clean docclean
 	find . -name '*.c' -exec rm -f {} \;
 	rm -f TAGS
 	$(PYTHON) setup.py clean -a
