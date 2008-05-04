@@ -755,9 +755,7 @@ that the Element has been parsed completely.
 It also allows to ``.clear()`` or modify the content of an Element to
 save memory. So if you parse a large tree and you want to keep memory
 usage small, you should clean up parts of the tree that you no longer
-need:
-
-.. sourcecode:: pycon
+need::
 
     >>> some_file_like = StringIO(
     ...     "<root><a><b>data</b></a><a><b/></a></root>")
