@@ -2,6 +2,21 @@
 lxml changelog
 ==============
 
+Under development
+=================
+
+Features added
+--------------
+
+Bugs fixed
+----------
+
+* Rare crash when serialising to a file object with certain encodings.
+
+Other changes
+-------------
+
+
 2.0.5 (2008-05-01)
 ==================
 
