@@ -643,7 +643,7 @@ cdef int _removeNode(_Document doc, xmlNode* c_node) except -1:
     _moveTail(c_next, c_node)
     if not attemptDeallocation(c_node):
         # make namespaces absolute
-        moveNodeToDocument(doc, c_node)
+        moveNodeToDocument(doc, c_node.doc, c_node)
     return 0
 
 cdef void _moveTail(xmlNode* c_tail, xmlNode* c_target):
@@ -709,6 +709,7 @@ cdef int _replaceSlice(_Element parent, xmlNode* c_node,
     """
     cdef xmlNode* c_orig_neighbour
     cdef xmlNode* c_next
+    cdef xmlDoc*  c_source_doc
     cdef _Element element
     cdef Py_ssize_t seqlength, i, c
     cdef _node_to_node_function next_element
@@ -792,12 +793,13 @@ cdef int _replaceSlice(_Element parent, xmlNode* c_node,
         for element in elements:
             assert element is not None, "Node must not be None"
             # move element and tail over
+            c_source_doc = element._c_node.doc
             c_next = element._c_node.next
             tree.xmlAddPrevSibling(c_node, element._c_node)
             _moveTail(c_next, element._c_node)
 
             # integrate element into new document
-            moveNodeToDocument(parent._doc, element._c_node)
+            moveNodeToDocument(parent._doc, c_source_doc, element._c_node)
 
             # stop at the end of the slice
             if slicelength > 0:
@@ -827,7 +829,9 @@ cdef int _appendChild(_Element parent, _Element child) except -1:
     """
     cdef xmlNode* c_next
     cdef xmlNode* c_node
+    cdef xmlDoc* c_source_doc
     c_node = child._c_node
+    c_source_doc = c_node.doc
     # store possible text node
     c_next = c_node.next
     # move node itself
@@ -836,7 +840,7 @@ cdef int _appendChild(_Element parent, _Element child) except -1:
     _moveTail(c_next, c_node)
     # uh oh, elements may be pointing to different doc when
     # parent element has moved; change them too..
-    moveNodeToDocument(parent._doc, c_node)
+    moveNodeToDocument(parent._doc, c_source_doc, c_node)
 
 cdef int _prependChild(_Element parent, _Element child) except -1:
     """Prepend a new child to a parent element.
@@ -844,7 +848,9 @@ cdef int _prependChild(_Element parent, _Element child) except -1:
     cdef xmlNode* c_next
     cdef xmlNode* c_child
     cdef xmlNode* c_node
+    cdef xmlDoc* c_source_doc
     c_node = child._c_node
+    c_source_doc = c_node.doc
     # store possible text node
     c_next = c_node.next
     # move node itself
@@ -857,14 +863,16 @@ cdef int _prependChild(_Element parent, _Element child) except -1:
     _moveTail(c_next, c_node)
     # uh oh, elements may be pointing to different doc when
     # parent element has moved; change them too..
-    moveNodeToDocument(parent._doc, c_node)
+    moveNodeToDocument(parent._doc, c_source_doc, c_node)
 
 cdef int _appendSibling(_Element element, _Element sibling) except -1:
     """Append a new child to a parent element.
     """
     cdef xmlNode* c_next
     cdef xmlNode* c_node
+    cdef xmlDoc* c_source_doc
     c_node = sibling._c_node
+    c_source_doc = c_node.doc
     # store possible text node
     c_next = c_node.next
     # move node itself
@@ -872,14 +880,16 @@ cdef int _appendSibling(_Element element, _Element sibling) except -1:
     _moveTail(c_next, c_node)
     # uh oh, elements may be pointing to different doc when
     # parent element has moved; change them too..
-    moveNodeToDocument(element._doc, c_node)
+    moveNodeToDocument(element._doc, c_source_doc, c_node)
 
 cdef int _prependSibling(_Element element, _Element sibling) except -1:
     """Append a new child to a parent element.
     """
     cdef xmlNode* c_next
     cdef xmlNode* c_node
+    cdef xmlDoc* c_source_doc
     c_node = sibling._c_node
+    c_source_doc = c_node.doc
     # store possible text node
     c_next = c_node.next
     # move node itself
@@ -887,7 +897,7 @@ cdef int _prependSibling(_Element element, _Element sibling) except -1:
     _moveTail(c_next, c_node)
     # uh oh, elements may be pointing to different doc when
     # parent element has moved; change them too..
-    moveNodeToDocument(element._doc, c_node)
+    moveNodeToDocument(element._doc, c_source_doc, c_node)
 
 cdef int isutf8(char* s):
     cdef char c
