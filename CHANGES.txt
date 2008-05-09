@@ -11,6 +11,12 @@ Features added
 Bugs fixed
 ----------
 
+* Windows build was broken.
+
+* Moving a subtree from a document created in one thread into a
+  document of another thread could crash when the rest of the source
+  document is deleted while the subtree is still in use.
+
 * Rare crash when serialising to a file object with certain encodings.
 
 Other changes
