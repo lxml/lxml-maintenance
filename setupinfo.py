@@ -10,6 +10,8 @@ except ImportError:
 
 EXT_MODULES = ["lxml.etree", "lxml.objectify","lxml.pyclasslookup"]
 
+PACKAGE_PATH = "src/lxml/"
+
 def env_var(name):
     value = os.getenv(name, '')
     return value.split(os.pathsep)
@@ -20,12 +22,12 @@ def ext_modules(static_include_dirs, static_library_dirs, static_cflags):
         print("Building with Cython %s." % Cython.Compiler.Version.version)
     else:
         print ("NOTE: Trying to build without Cython, pre-generated "
-               "'src/lxml/etree.c' needs to be available.")
+               "'%slxml.etree.c' needs to be available." % PACKAGE_PATH)
         source_extension = ".c"
 
     if OPTION_WITHOUT_OBJECTIFY:
         modules = [ entry for entry in EXT_MODULES
-                    if 'objectify' not in entry[0] ]
+                    if 'objectify' not in entry ]
     else:
         modules = EXT_MODULES
 
@@ -60,10 +62,11 @@ def ext_modules(static_include_dirs, static_library_dirs, static_cflags):
     
     result = []
     for module in modules:
+        main_module_source = PACKAGE_PATH + module + source_extension
         result.append(
             Extension(
             module,
-            sources = ["src/lxml/" + module + source_extension],
+            sources = [main_module_source],
             extra_compile_args = ['-w'] + _cflags,
             define_macros = _define_macros,
             include_dirs = _include_dirs,
@@ -109,7 +112,6 @@ def include_dirs(static_include_dirs):
     if OPTION_STATIC:
         if not static_include_dirs:
             static_include_dirs = env_var('INCLUDE')
-        assert static_include_dirs, "Static build not configured, see doc/build.txt"
         return static_include_dirs
     # filter them from xslt-config --cflags
     result = []
@@ -127,15 +129,21 @@ def cflags(static_cflags):
     if OPTION_STATIC:
         if not static_cflags:
             static_cflags = env_var('CFLAGS')
-        assert static_cflags, "Static build not configured, see doc/build.txt"
         result.extend(static_cflags)
-        return result
+    else:
+        # anything from xslt-config --cflags that doesn't start with -I
+        possible_cflags = flags('cflags')
+        for possible_cflag in possible_cflags:
+            if not possible_cflag.startswith('-I'):
+                result.append(possible_cflag)
 
-    # anything from xslt-config --cflags that doesn't start with -I
-    possible_cflags = flags('cflags')
-    for possible_cflag in possible_cflags:
-        if not possible_cflag.startswith('-I'):
-            result.append(possible_cflag)
+    if sys.platform in ('darwin',):
+        for opt in result:
+            if 'flat_namespace' in opt:
+                break
+        else:
+            result.append('-flat_namespace')
+
     return result
 
 def define_macros():
