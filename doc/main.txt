@@ -146,8 +146,8 @@ MS Windows usually become available through PyPI a few days after a
 source release.  If you can't wait, consider trying a less recent
 release version first.
 
-The latest version is `lxml 2.0.5`_, released 2008-05-01
-(`changes for 2.0.5`_).  `Older versions`_ are listed below.
+The latest version is `lxml 2.0.6`_, released 2008-05-31
+(`changes for 2.0.6`_).  `Older versions`_ are listed below.
 
 Please take a look at the `installation instructions`_!
 
@@ -215,7 +215,9 @@ obstacle to using lxml in your codebase.
 Old Versions
 ------------
 
-.. _`PDF documentation`: lxmldoc-2.0.5.pdf
+.. _`PDF documentation`: lxmldoc-2.0.6.pdf
+
+* `lxml 2.0.5`_, released 2008-05-01 (`changes for 2.0.5`_)
 
 * `lxml 2.0.4`_, released 2008-04-13 (`changes for 2.0.4`_)
 
@@ -277,6 +279,7 @@ Old Versions
 
 * `lxml 0.5`_,   released 2005-04-08
 
+.. _`lxml 2.0.6`: lxml-2.0.6.tgz
 .. _`lxml 2.0.5`: lxml-2.0.5.tgz
 .. _`lxml 2.0.4`: lxml-2.0.4.tgz
 .. _`lxml 2.0.3`: lxml-2.0.3.tgz
@@ -308,6 +311,7 @@ Old Versions
 .. _`lxml 0.5.1`: lxml-0.5.1.tgz
 .. _`lxml 0.5`: lxml-0.5.tgz
 
+.. _`changes for 2.0.6`: changes-2.0.6.html
 .. _`changes for 2.0.5`: changes-2.0.5.html
 .. _`changes for 2.0.4`: changes-2.0.4.html
 .. _`changes for 2.0.3`: changes-2.0.3.html
