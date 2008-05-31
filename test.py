@@ -71,7 +71,11 @@ import types
 import getopt
 import unittest
 import traceback
-from sets import Set
+try:
+    Set = set
+except NameError:
+    # Python 2.3
+    from sets import Set
 
 __metaclass__ = type
 
