@@ -14,7 +14,10 @@ try:
 except ImportError:
     # DictMixin was introduced in Python 2.4
     from lxml.html._dictmixin import DictMixin
-import sets
+try:
+    set
+except NameError:
+    from sets import Set as set
 
 __all__ = [
     'document_fromstring', 'fragment_fromstring', 'fragments_fromstring', 'fromstring',
@@ -827,7 +830,7 @@ class InputGetter(object):
         return bool(results)
 
     def keys(self):
-        names = sets.Set()
+        names = set()
         for el in self:
             if el.name is not None:
                 names.add(el.name)
