@@ -2,6 +2,22 @@
 lxml changelog
 ==============
 
+Under development
+=================
+
+Features added
+--------------
+
+Bugs fixed
+----------
+
+* Crash in Element class lookup classes when the __init__() method of
+  the super class is not called from Python subclasses.
+
+Other changes
+-------------
+
+
 2.0.6 (2008-05-31)
 ==================
 

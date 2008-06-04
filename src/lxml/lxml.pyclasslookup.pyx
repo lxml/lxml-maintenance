@@ -311,8 +311,7 @@ cdef class PythonElementClassLookup(FallbackElementClassLookup):
 
     If you return None from this method, the fallback will be called.
     """
-    def __init__(self, ElementClassLookup fallback=None):
-        FallbackElementClassLookup.__init__(self, fallback)
+    def __cinit__(self):
         self._lookup_function = _lookup_class
 
     def lookup(self, doc, element):
