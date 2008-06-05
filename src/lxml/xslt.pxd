@@ -54,7 +54,7 @@ cdef extern from "libxslt/documents.h":
     ctypedef xmlDoc* (*xsltDocLoaderFunc)(char* URI, xmlDict* dict,
                                           int options,
                                           void* ctxt,
-                                          xsltLoadType type)
+                                          xsltLoadType type) nogil
     cdef xsltDocLoaderFunc xsltDocDefaultLoader
     cdef void xsltSetLoaderFunc(xsltDocLoaderFunc f) nogil
 
