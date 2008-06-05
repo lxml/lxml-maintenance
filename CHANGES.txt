@@ -11,6 +11,8 @@ Features added
 Bugs fixed
 ----------
 
+* Potential threading problem in XInclude.
+
 * Crash in Element class lookup classes when the __init__() method of
   the super class is not called from Python subclasses.
 
