@@ -46,11 +46,8 @@ namespace (None), and the function `loadsofargs` with the name `countargs`.
 Now we're going to create a document that we can run XPath expressions
 against::
 
-  >>> from lxml import etree
-  >>> from StringIO import StringIO
-  >>> f = StringIO('<a><b>Haegar</b></a>')
-  >>> doc = etree.parse(f)
-  >>> root = doc.getroot()
+  >>> root = etree.XML('<a><b>Haegar</b></a>')
+  >>> doc = etree.ElementTree(root)
 
 Done. Now we can have XPath expressions call our new function::
 
@@ -148,7 +145,7 @@ XSL transformations::
   >>> print e.evaluate('f:hello(local-name(/a))')
   Hello a
 
-  >>> xslt = etree.XSLT(etree.ElementTree(etree.XML('''
+  >>> xslt = etree.XSLT(etree.XML('''
   ...   <stylesheet version="1.0"
   ...          xmlns="http://www.w3.org/1999/XSL/Transform"
   ...          xmlns:es="http://mydomain.org/myother/functions">
@@ -157,7 +154,7 @@ XSL transformations::
   ...       <value-of select="es:hello(string(//b))"/>
   ...     </template>
   ...   </stylesheet>
-  ... ''')))
+  ... '''))
   >>> print xslt(doc)
   Ola Haegar
 
@@ -165,6 +162,7 @@ It is also possible to register namespaces with a single evaluator after its
 creation.  While the following example involves no functions, the idea should
 still be clear::
   
+  >>> from StringIO import StringIO
   >>> f = StringIO('<a xmlns="http://mydomain.org/myfunctions" />')
   >>> ns_doc = etree.parse(f)
   >>> e = etree.XPathEvaluator(ns_doc)
