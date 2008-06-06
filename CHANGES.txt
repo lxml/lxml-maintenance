@@ -19,6 +19,9 @@ Bugs fixed
 Other changes
 -------------
 
+* Non-ASCII characters in attribute values are no longer escaped on
+  serialisation.
+
 
 2.0.6 (2008-05-31)
 ==================
