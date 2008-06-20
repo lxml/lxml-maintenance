@@ -13,6 +13,9 @@ Features added
 Bugs fixed
 ----------
 
+* Descending dot-separated classes in CSS selectors were not resolved
+  correctly.
+
 * ``ElementTree.parse()`` didn't handle target parser result.
 
 * Potential threading problem in XInclude.
