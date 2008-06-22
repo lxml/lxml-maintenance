@@ -2,6 +2,22 @@
 lxml changelog
 ==============
 
+Under development
+=================
+
+Features added
+--------------
+
+Bugs fixed
+----------
+
+* CSS selector parser dropped remaining expression after a function
+  with parameters.
+
+Other changes
+-------------
+
+
 2.0.7 (2008-06-20)
 ==================
 
