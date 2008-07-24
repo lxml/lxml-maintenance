@@ -388,11 +388,7 @@ cdef class XSLT:
         cdef xslt.xsltTransformContext* transform_ctxt
         cdef xmlDoc* c_result
         cdef xmlDoc* c_doc
-
-        if not _checkThreadDict(self._c_style.doc.dict):
-            if profile_run is not False:
-                _kw['profile_run'] = profile_run
-            return _copyXSLT(self)(_input, **_kw)
+        cdef tree.xmlDict* c_dict
 
         input_doc = _documentOrRaise(_input)
         root_node = _rootNodeOrRaise(_input)
@@ -460,6 +456,23 @@ cdef class XSLT:
                 resolver_context.clear()
 
         result_doc = _documentFactory(c_result, input_doc._parser)
+
+        c_dict = c_result.dict
+        __GLOBAL_PARSER_CONTEXT.initThreadDictRef(&c_result.dict)
+        if c_dict is not c_result.dict or \
+                self._c_style.doc.dict is not c_result.dict or \
+                input_doc._c_doc.dict is not c_result.dict:
+            with nogil:
+                if c_dict is not c_result.dict:
+                    fixThreadDictNames(<xmlNode*>c_result,
+                                       c_dict, c_result.dict)
+                if self._c_style.doc.dict is not c_result.dict:
+                    fixThreadDictNames(<xmlNode*>c_result,
+                                       self._c_style.doc.dict, c_result.dict)
+                if input_doc._c_doc.dict is not c_result.dict:
+                    fixThreadDictNames(<xmlNode*>c_result,
+                                       input_doc._c_doc.dict, c_result.dict)
+
         return _xsltResultTreeFactory(result_doc, self, profile_doc)
 
     cdef xmlDoc* _run_transform(self, xmlDoc* c_input_doc,

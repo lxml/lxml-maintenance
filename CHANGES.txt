@@ -14,6 +14,9 @@ Features added
 Bugs fixed
 ----------
 
+* Crash when parsing XSLT stylesheets in a thread and using them in
+  another.
+
 * CSS selector parser dropped remaining expression after a function
   with parameters.
 
