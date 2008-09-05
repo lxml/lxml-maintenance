@@ -88,7 +88,7 @@ http://codespeak.net/svn/lxml/trunk#egg=lxml-dev
 """ + branch_link) % { "branch_version" : versioninfo.branch_version() }) +
                       versioninfo.changes()),
     classifiers = [
-    versioninfo.dev_status(),
+    'Development Status :: 6 - Mature', # versioninfo.dev_status(),
     'Intended Audience :: Developers',
     'Intended Audience :: Information Technology',
     'License :: OSI Approved :: BSD License',
