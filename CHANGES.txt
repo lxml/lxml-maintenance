@@ -2,11 +2,8 @@
 lxml changelog
 ==============
 
-Under development
-=================
-
-Features added
---------------
+2.0.9 (2008-09-05)
+==================
 
 Bugs fixed
 ----------
@@ -15,9 +12,6 @@ Bugs fixed
 
 * Target parser did not honour the ``recover`` option and raised an
   exception instead of calling ``.close()`` on the target.
-
-Other changes
--------------
 
 
 2.0.8 (2008-07-24)
