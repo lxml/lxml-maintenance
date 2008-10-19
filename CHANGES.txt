@@ -2,6 +2,27 @@
 lxml changelog
 ==============
 
+Under development
+=================
+
+Features added
+--------------
+
+Bugs fixed
+----------
+
+* Test suite fixes for libxml2 2.7.
+
+* Resolver.resolve_string() did not work for non-ASCII byte strings.
+
+* Resolver.resolve_file() was broken.
+
+* Overriding the parser encoding didn't work for many encodings.
+
+Other changes
+-------------
+
+
 2.1.2 (2008-09-05)
 ==================
 

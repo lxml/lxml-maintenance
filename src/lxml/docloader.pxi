@@ -47,9 +47,13 @@ cdef class Resolver:
         You can pass the source URL as 'base_url' keyword.
         """
         cdef _InputDocument doc_ref
+        if python.PyUnicode_Check(string):
+            string = python.PyUnicode_AsUTF8String(string)
+        elif not python.PyString_Check(string):
+            raise TypeError, "argument must be a byte string or unicode string"
         doc_ref = _InputDocument()
         doc_ref._type = PARSER_DATA_STRING
-        doc_ref._data_bytes = _utf8(string)
+        doc_ref._data_bytes = string
         if base_url is not None:
             doc_ref._filename = _encodeFilename(base_url)
         return doc_ref
