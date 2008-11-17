@@ -2,6 +2,17 @@
 lxml changelog
 ==============
 
+2.0.10 (2008-11-17)
+===================
+
+Bugs fixed
+----------
+
+* Ref-count leaks when lxml enters a try-except statement while an
+  outside exception lives in sys.exc_*(). This was due to a problem in
+  Cython, not lxml itself.
+
+
 2.0.9 (2008-09-05)
 ==================
 
