@@ -1375,11 +1375,9 @@ __replace_meta_content_type = re.compile(
 def tostring(doc, pretty_print=False, include_meta_content_type=False,
              encoding=None, method="html"):
     """Return an HTML string representation of the document.
- 
-    Note: if include_meta_content_type is true this will create a
-    ``<meta http-equiv="Content-Type" ...>`` tag in the head;
-    regardless of the value of include_meta_content_type any existing
-    ``<meta http-equiv="Content-Type" ...>`` tag will be removed
+
+    Note: the 'include_meta_content_type' argument exists purely for
+    compatibility and does not serve any purpose.
 
     The ``encoding`` argument controls the output encoding (defauts to
     ASCII, with &#...; character references for any characters outside
