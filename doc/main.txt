@@ -321,6 +321,7 @@ in-development version <http://codespeak.net/lxml/dev/>`_.
 .. _`lxml 2.1beta2`: lxml-2.1beta2.tgz
 .. _`lxml 2.1beta1`: lxml-2.1beta1.tgz
 .. _`lxml 2.1alpha1`: lxml-2.1alpha1.tgz
+.. _`lxml 2.0.11`: lxml-2.0.11.tgz
 .. _`lxml 2.0.10`: lxml-2.0.10.tgz
 .. _`lxml 2.0.9`: lxml-2.0.9.tgz
 .. _`lxml 2.0.8`: lxml-2.0.8.tgz
