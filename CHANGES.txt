@@ -2,11 +2,14 @@
 lxml changelog
 ==============
 
-Under development
-=================
+2.1.5 (2009-01-06)
+==================
 
 Bugs fixed
 ----------
+
+* Potential memory leak on exception handling.  This was due to a
+  problem in Cython, not lxml itself.
 
 * Failing import on systems that have an ``io`` module.
 
