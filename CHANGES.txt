@@ -2,6 +2,15 @@
 lxml changelog
 ==============
 
+Under development
+=================
+
+Bugs fixed
+----------
+
+* Failing import on systems that have an ``io`` module.
+
+
 2.1.4 (2008-12-12)
 ==================
 
