@@ -46,6 +46,7 @@ def ext_modules(static_include_dirs, static_library_dirs,
             'libs', 'build/tmp',
             static_include_dirs, static_library_dirs,
             static_cflags, static_binaries,
+            libiconv_version=OPTION_LIBICONV_VERSION,
             libxml2_version=OPTION_LIBXML2_VERSION,
             libxslt_version=OPTION_LIBXSLT_VERSION)
     if CYTHON_INSTALLED:
@@ -320,7 +321,7 @@ def option_value(name):
     env_val = os.getenv(name.upper().replace('-', '_'))
     return env_val
 
-# pick up any commandline options
+# pick up any commandline options and/or env variables
 OPTION_WITHOUT_OBJECTIFY = has_option('without-objectify')
 OPTION_WITHOUT_ASSERT = has_option('without-assert')
 OPTION_WITHOUT_THREADING = has_option('without-threading')
@@ -337,3 +338,4 @@ if OPTION_BUILD_LIBXML2XSLT:
     OPTION_STATIC = True
 OPTION_LIBXML2_VERSION = option_value('libxml2-version')
 OPTION_LIBXSLT_VERSION = option_value('libxslt-version')
+OPTION_LIBICONV_VERSION = option_value('libiconv-version')

@@ -31,8 +31,8 @@ __version__ = etree.__version__
 cdef object re
 import re
 
-cdef tuple IGNORABLE_ERRORS
-IGNORABLE_ERRORS = (ValueError, TypeError)
+cdef tuple IGNORABLE_ERRORS = (ValueError, TypeError)
+cdef object is_special_method = re.compile(u'__.*__$').match
 
 cdef object islice
 from itertools import islice
@@ -127,10 +127,12 @@ cdef class ObjectifiedElement(ElementBase):
     u"""Main XML Element class.
 
     Element children are accessed as object attributes.  Multiple children
-    with the same name are available through a list index.  Example:
+    with the same name are available through a list index.  Example::
 
-       >>> root = etree.XML("<root><c1><c2>0</c2><c2>1</c2></c1></root>")
+       >>> root = XML("<root><c1><c2>0</c2><c2>1</c2></c1></root>")
        >>> second_c2 = root.c1.c2[1]
+       >>> print(second_c2.text)
+       1
 
     Note that you cannot (and must not) instantiate this class or its
     subclasses.
@@ -218,6 +220,8 @@ cdef class ObjectifiedElement(ElementBase):
         u"""Return the (first) child with the given tag name.  If no namespace
         is provided, the child will be looked up in the same one as self.
         """
+        if is_special_method(tag):
+            return object.__getattr__(self, tag)
         return _lookupChildOrRaise(self, tag)
 
     def __setattr__(self, tag, value):
@@ -519,9 +523,10 @@ cdef _appendValue(_Element parent, tag, value):
         for item in value:
             _appendValue(parent, tag, item)
     else:
-        new_element = cetree.makeSubElement(
-            parent, tag, None, None, None, None)
+        new_element = cetree.makeElement(
+            tag, parent._doc, None, None, None, None, None)
         _setElementValue(new_element, value)
+        cetree.appendChild(parent, new_element)
 
 cdef _setElementValue(_Element element, value):
     cdef python.PyObject* _pytype
@@ -1161,46 +1166,6 @@ cdef object _guessElementClass(tree.xmlNode* c_node):
 ################################################################################
 # adapted ElementMaker supports registered PyTypes
 
-cdef class _ObjectifyElementMakerCaller # forward declaration
-
-cdef extern from "etree_defs.h":
-    # macro call to 't->tp_new()' for fast instantiation
-    cdef _ObjectifyElementMakerCaller NEW_ELEMENT_MAKER "PY_NEW" (object t)
-
-cdef class ElementMaker:
-    u"""ElementMaker(self, namespace=None, nsmap=None, annotate=True, makeelement=None)
-    """
-    cdef object _makeelement
-    cdef object _namespace
-    cdef object _nsmap
-    cdef bint _annotate
-    def __init__(self, *, namespace=None, nsmap=None, annotate=True,
-                 makeelement=None):
-        if nsmap is None:
-            nsmap = _DEFAULT_NSMAP
-        self._nsmap = nsmap
-        if namespace is None:
-            self._namespace = None
-        else:
-            self._namespace = u"{%s}" % namespace
-        self._annotate = annotate
-        if makeelement is not None:
-            assert callable(makeelement)
-            self._makeelement = makeelement
-        else:
-            self._makeelement = None
-
-    def __getattr__(self, tag):
-        cdef _ObjectifyElementMakerCaller element_maker
-        if self._namespace is not None and tag[0] != u"{":
-            tag = self._namespace + tag
-        element_maker = NEW_ELEMENT_MAKER(_ObjectifyElementMakerCaller)
-        element_maker._tag = tag
-        element_maker._nsmap = self._nsmap
-        element_maker._annotate = self._annotate
-        element_maker._element_factory = self._makeelement
-        return element_maker
-
 cdef class _ObjectifyElementMakerCaller:
     cdef object _tag
     cdef object _nsmap
@@ -1266,6 +1231,8 @@ cdef class _ObjectifyElementMakerCaller:
         return element
 
 cdef _add_text(_Element elem, text):
+    # add text to the tree in construction, either as element text or
+    # tail text, depending on the current tree state
     cdef tree.xmlNode* c_child
     c_child = cetree.findChildBackwards(elem._c_node, 0)
     if c_child is not NULL:
@@ -1278,6 +1245,62 @@ cdef _add_text(_Element elem, text):
         if old is not None:
             text = old + text
         cetree.setNodeText(elem._c_node, text)
+
+cdef extern from "etree_defs.h":
+    # macro call to 't->tp_new()' for fast instantiation
+    cdef _ObjectifyElementMakerCaller NEW_ELEMENT_MAKER "PY_NEW" (object t)
+
+cdef class ElementMaker:
+    u"""ElementMaker(self, namespace=None, nsmap=None, annotate=True, makeelement=None)
+
+    An ElementMaker that can be used for constructing trees.
+
+    Example::
+
+      >>> M = ElementMaker(annotate=False)
+      >>> html = M.html( M.body( M.p('hello', M.br, 'objectify') ) )
+
+      >>> from lxml.etree import tostring
+      >>> print(tostring(html, method='html').decode('ASCII'))
+      <html><body><p>hello<br>objectify</p></body></html>
+
+    Note that this module has a predefined ElementMaker instance called ``E``.
+    """
+    cdef object _makeelement
+    cdef object _namespace
+    cdef object _nsmap
+    cdef bint _annotate
+    def __init__(self, *, namespace=None, nsmap=None, annotate=True,
+                 makeelement=None):
+        if nsmap is None:
+            if annotate:
+                nsmap = _DEFAULT_NSMAP
+            else:
+                nsmap = {}
+        self._nsmap = nsmap
+        if namespace is None:
+            self._namespace = None
+        else:
+            self._namespace = u"{%s}" % namespace
+        self._annotate = annotate
+        if makeelement is not None:
+            assert callable(makeelement)
+            self._makeelement = makeelement
+        else:
+            self._makeelement = None
+
+    def __getattr__(self, tag):
+        cdef _ObjectifyElementMakerCaller element_maker
+        if is_special_method(tag):
+            return object.__getattr__(self, tag)
+        if self._namespace is not None and tag[0] != u"{":
+            tag = self._namespace + tag
+        element_maker = NEW_ELEMENT_MAKER(_ObjectifyElementMakerCaller)
+        element_maker._tag = tag
+        element_maker._nsmap = self._nsmap
+        element_maker._annotate = self._annotate
+        element_maker._element_factory = self._makeelement
+        return element_maker
 
 ################################################################################
 # Recursive element dumping
@@ -1700,8 +1723,7 @@ cdef _annotate(_Element element, bint annotate_xsi, bint annotate_pytype,
                     tree.xmlSetNsProp(c_node, c_ns, "nil", "true")
     tree.END_FOR_EACH_ELEMENT_FROM(c_node)
 
-cdef object _strip_attributes
-_strip_attributes = etree.strip_attributes
+cdef object _strip_attributes = etree.strip_attributes
 
 def deannotate(element_or_tree, *, pytype=True, xsi=True, xsi_nil=False):
     u"""deannotate(element_or_tree, pytype=True, xsi=True, xsi_nil=False)
@@ -1714,6 +1736,10 @@ def deannotate(element_or_tree, *, pytype=True, xsi=True, xsi_nil=False):
     default), 'xsi:type' attributes will be removed.
     If the 'xsi_nil' keyword argument is True (default: False), 'xsi:nil'
     attributes will be removed.
+
+    Note that this does not touch the namespace declarations.  If you
+    want to remove unused namespace declarations from the tree, use
+    ``lxml.etree.cleanup_namespaces()``.
     """
     cdef list attribute_names = []
 

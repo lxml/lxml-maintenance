@@ -580,6 +580,27 @@ class ETreeOnlyTestCase(HelperTestCase):
         self.etree.XMLParser(encoding="utf-8")
         self.etree.XMLParser(encoding="iso-8859-1")
 
+    def test_feed_parser_recover(self):
+        parser = self.etree.XMLParser(recover=True)
+
+        parser.feed('<?xml version=')
+        parser.feed('"1.0"?><ro')
+        parser.feed('ot><')
+        parser.feed('a test="works"')
+        parser.feed('><othertag/></root') # <a> not closed!
+        parser.feed('>')
+
+        root = parser.close()
+
+        self.assertEquals(root.tag, "root")
+        self.assertEquals(len(root), 1)
+        self.assertEquals(root[0].tag, "a")
+        self.assertEquals(root[0].get("test"), "works")
+        self.assertEquals(len(root[0]), 1)
+        self.assertEquals(root[0][0].tag, "othertag")
+        # FIXME: would be nice to get some errors logged ...
+        #self.assert_(len(parser.error_log) > 0, "error log is empty")
+
     def test_elementtree_parser_target_type_error(self):
         assertEquals = self.assertEquals
         assertFalse  = self.assertFalse
@@ -970,7 +991,7 @@ class ETreeOnlyTestCase(HelperTestCase):
             parser = self.etree.XMLParser(resolve_entities=False)
             Entity = self.etree.Entity
 
-            xml = '<!DOCTYPE doc SYSTEM "test"><doc>&myentity;</doc>'
+            xml = _bytes('<!DOCTYPE doc SYSTEM "test"><doc>&myentity;</doc>')
             tree = parse(BytesIO(xml), parser)
             root = tree.getroot()
             self.assertEquals(root[0].tag, Entity)
@@ -980,6 +1001,25 @@ class ETreeOnlyTestCase(HelperTestCase):
 
             self.assertEquals(_bytes('<doc>&myentity;</doc>'),
                               tostring(root))
+
+        def test_entity_restructure(self):
+            xml = _bytes('''<!DOCTYPE root [ <!ENTITY nbsp "&#160;"> ]>
+                <root>
+                  <child1/>
+                  <child2/>
+                  <child3>&nbsp;</child3>
+                </root>''')
+
+            parser = self.etree.XMLParser(resolve_entities=False)
+            root = etree.fromstring(xml, parser)
+            self.assertEquals([ el.tag for el in root ],
+                              ['child1', 'child2', 'child3'])
+
+            root[0] = root[-1]
+            self.assertEquals([ el.tag for el in root ],
+                              ['child3', 'child2'])
+            self.assertEquals(root[0][0].text, '&nbsp;')
+            self.assertEquals(root[0][0].name, 'nbsp')
 
     def test_entity_append(self):
         Entity = self.etree.Entity
@@ -1060,6 +1100,15 @@ class ETreeOnlyTestCase(HelperTestCase):
         self.assertEquals('test', root.text)
         self.assertEquals(_bytes('<root><![CDATA[test]]></root>'),
                           tostring(root))
+
+    def test_cdata_xpath(self):
+        tostring = self.etree.tostring
+        parser = self.etree.XMLParser(strip_cdata=False)
+        root = self.etree.XML(_bytes('<root><![CDATA[test]]></root>'), parser)
+        self.assertEquals(_bytes('<root><![CDATA[test]]></root>'),
+                          tostring(root))
+
+        self.assertEquals(['test'], root.xpath('//text()'))
 
     # TypeError in etree, AssertionError in ElementTree;
     def test_setitem_assert(self):
