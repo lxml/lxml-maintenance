@@ -2,7 +2,7 @@
 lxml changelog
 ==============
 
-2.2.2 (2009-10-??)
+2.2.3 (2009-10-??)
 ==================
 
 Features added
@@ -10,6 +10,9 @@ Features added
 
 Bugs fixed
 ----------
+
+* The ``resolve_entities`` option did not work in the incremental feed
+  parser.
 
 * Looking up and deleting attributes without a namespace could hit a
   namespaced attribute of the same name instead.
