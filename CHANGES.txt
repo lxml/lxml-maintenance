@@ -23,8 +23,9 @@ Bugs fixed
 * Modifying trees that contain parsed entity references could result
   in an infinite loop.
 
-* ObjectifiedElement.__setattr__ created an empty-string child element when the
-  attribute value was rejected as a non-unicode/non-ascii string
+* ``ObjectifiedElement.__setattr__`` created an empty-string child
+  element when the attribute value was rejected as a
+  non-unicode/non-ascii string
 
 * Syntax errors in ``lxml.cssselect`` could result in misleading error
   messages.
@@ -50,7 +51,7 @@ Bugs fixed
 * The ``ElementMaker`` in lxml.objectify no longer defines the default
   namespaces when annotation is disabled.
 
-* Feed parser failed to honout the 'recover' option on parse errors.
+* Feed parser failed to honour the 'recover' option on parse errors.
 
 * Diverting the error logging to Python's logging system was broken.
 
