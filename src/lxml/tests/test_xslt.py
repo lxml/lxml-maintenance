@@ -721,6 +721,54 @@ class ETreeXSLTTestCase(HelperTestCase):
         self.assertEquals(self._rootstring(result),
                           _bytes('<A><b>X</b></A>'))
 
+    def test_extension_element_doc_context(self):
+        tree = self.parse('<a><b>B</b></a>')
+        style = self.parse('''\
+<xsl:stylesheet version="1.0"
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:myns="testns"
+    extension-element-prefixes="myns"
+    exclude-result-prefixes="myns">
+  <xsl:template match="/">
+    <A><myns:myext>b</myns:myext></A>
+  </xsl:template>
+</xsl:stylesheet>''')
+
+        tags = []
+
+        class MyExt(etree.XSLTExtension):
+            def execute(self, context, self_node, input_node, output_parent):
+                tags.append(input_node.tag)
+
+        extensions = { ('testns', 'myext') : MyExt() }
+
+        result = tree.xslt(style, extensions=extensions)
+        self.assertEquals(tags, ['a'])
+
+    def test_extension_element_unsupported_context(self):
+        tree = self.parse('<a><!--a comment--></a>')
+        style = self.parse('''\
+<xsl:stylesheet version="1.0"
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:myns="testns"
+    extension-element-prefixes="myns"
+    exclude-result-prefixes="myns">
+  <xsl:template match="comment()">
+    <A><myns:myext>b</myns:myext></A>
+  </xsl:template>
+</xsl:stylesheet>''')
+
+        tags = []
+
+        class MyExt(etree.XSLTExtension):
+            def execute(self, context, self_node, input_node, output_parent):
+                tags.append(input_node.tag)
+
+        extensions = { ('testns', 'myext') : MyExt() }
+
+        self.assertRaises(TypeError, tree.xslt, style, extensions=extensions)
+        self.assertEquals(tags, [])
+
     def test_extension_element_content(self):
         tree = self.parse('<a><b>B</b></a>')
         style = self.parse('''\
