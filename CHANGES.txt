@@ -2,6 +2,22 @@
 lxml changelog
 ==============
 
+2.2.5 (?)
+==================
+
+Features added
+--------------
+
+* Support for running XSLT extension elements on the input root node
+  (e.g. in a template matching on "/").
+
+Bugs fixed
+----------
+
+* Crash in XSLT extension elements when the XSLT context node is not
+  an element.
+
+
 2.2.4 (2009-11-11)
 ==================
 

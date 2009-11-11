@@ -81,6 +81,7 @@ cdef void _callExtensionElement(xslt.xsltTransformContext* c_ctxt,
     cdef XSLTExtension extension
     cdef python.PyObject* dict_result
     cdef char* c_uri
+    cdef xmlNode* c_node
     cdef _ReadOnlyElementProxy context_node, self_node, output_parent
     c_uri = _getNs(c_inst_node)
     if c_uri is NULL:
@@ -100,8 +101,20 @@ cdef void _callExtensionElement(xslt.xsltTransformContext* c_ctxt,
 
         try:
             self_node     = _newReadOnlyProxy(None, c_inst_node)
-            context_node  = _newReadOnlyProxy(self_node, c_context_node)
             output_parent = _newAppendOnlyProxy(self_node, c_ctxt.insert)
+
+            if c_context_node.type == tree.XML_ELEMENT_NODE:
+                context_node  = _newReadOnlyProxy(self_node, c_context_node)
+            elif c_context_node.type in (tree.XML_DOCUMENT_NODE,
+                                         tree.XML_HTML_DOCUMENT_NODE):
+                c_node = tree.xmlDocGetRootElement(<xmlDoc*>c_context_node)
+                if c_node is not NULL:
+                    context_node = _newReadOnlyProxy(self_node, c_node)
+                else:
+                    context_node = None
+            else:
+                raise TypeError, \
+                      u"Unsupported XSLT context node type %d, extension elements require an element" % c_context_node.type
 
             context._extension_element_proxy = self_node
             extension.execute(context, self_node, context_node, output_parent)
