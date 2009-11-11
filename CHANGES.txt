@@ -2,6 +2,15 @@
 lxml changelog
 ==============
 
+2.2.4 (2009-11-11)
+==================
+
+Bugs fixed
+----------
+
+* Static build of libxml2/libxslt was broken.
+
+
 2.2.3 (2009-10-30)
 ==================
 
