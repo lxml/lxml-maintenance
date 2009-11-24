@@ -14,6 +14,9 @@ Features added
 Bugs fixed
 ----------
 
+* The functions ``strip_tags()`` and ``strip_elements()`` in
+  ``lxml.etree`` did not remove all occurrences of a tag in all cases.
+
 * Crash in XSLT extension elements when the XSLT context node is not
   an element.
 
