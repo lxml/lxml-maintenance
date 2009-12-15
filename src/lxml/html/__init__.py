@@ -821,18 +821,22 @@ def submit_form(form, extra_values=None, open_http=None):
     return open_http(form.method, form.action, values)
 
 def open_http_urllib(method, url, values):
-    import urllib
     ## FIXME: should test that it's not a relative URL or something
+    try:
+        from urllib import urlencode, urlopen
+    except ImportError: # Python 3
+        from urllib.request import urlopen
+        from urllib.parse import urlencode
     if method == 'GET':
         if '?' in url:
             url += '&'
         else:
             url += '?'
-        url += urllib.urlencode(values)
+        url += urlencode(values)
         data = None
     else:
-        data = urllib.urlencode(values)
-    return urllib.urlopen(url, data)
+        data = urlencode(values)
+    return urlopen(url, data)
 
 class FieldsDict(DictMixin):
 

@@ -14,6 +14,8 @@ Features added
 Bugs fixed
 ----------
 
+* lxml.html.open_http_urllib() did not work in Python 3.
+
 * The functions ``strip_tags()`` and ``strip_elements()`` in
   ``lxml.etree`` did not remove all occurrences of a tag in all cases.
 
