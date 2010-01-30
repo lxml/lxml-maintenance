@@ -13,8 +13,15 @@ Features added
 
 Bugs fixed
 ----------
+
+* Support recent versions of html5lib by not requiring its
+  ``XHTMLParser`` in ``htmlparser.py`` anymore.
+
 * Manually instantiating the custom element classes in
   ``lxml.objectify`` could crash.
+
+* Invalid XML text characters were not rejected by the API when they
+  appeared in unicode strings directly after non-ASCII characters.
 
 * lxml.html.open_http_urllib() did not work in Python 3.
 
