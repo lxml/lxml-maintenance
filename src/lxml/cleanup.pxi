@@ -243,7 +243,9 @@ cdef _strip_tags(_Document doc, xmlNode* c_node,
             if c_child.type == tree.XML_ELEMENT_NODE:
                 for i in range(c_tag_count):
                     if _tagMatchesExactly(c_child, c_ns_tags[2*i], c_ns_tags[2*i+1]):
-                        c_next = _findChildForwards(c_child, 0) or _nextElement(c_child)
+                        c_next = _findChildForwards(c_child, 0)
+                        if c_next is NULL:
+                            c_next = _nextElement(c_child)
                         _replaceNodeByChildren(doc, c_child)
                         if not attemptDeallocation(c_child):
                             if c_child.nsDef is not NULL:
