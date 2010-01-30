@@ -13,6 +13,8 @@ Features added
 
 Bugs fixed
 ----------
+* Manually instantiating the custom element classes in
+  ``lxml.objectify`` could crash.
 
 * lxml.html.open_http_urllib() did not work in Python 3.
 
