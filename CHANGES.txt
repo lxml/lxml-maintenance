@@ -14,6 +14,9 @@ Features added
 Bugs fixed
 ----------
 
+* Crash in XPath evaluation when reading smart strings from a document
+  other than the original context document.
+
 * Support recent versions of html5lib by not requiring its
   ``XHTMLParser`` in ``htmlparser.py`` anymore.
 
