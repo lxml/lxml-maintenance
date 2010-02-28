@@ -90,7 +90,7 @@ get it from the subversion repository at http://codespeak.net/svn/lxml/trunk .
 Running ``easy_install lxml==dev`` will install it from
 http://codespeak.net/svn/lxml/trunk#egg=lxml-dev
 
-""" + branch_link) % { "branch_version" : versioninfo.branch_version() }) +
+""" + branch_link) % { "branch_version" : versioninfo.branch_version() }) + '\n' +
                       versioninfo.changes()),
     classifiers = [
     versioninfo.dev_status(),
