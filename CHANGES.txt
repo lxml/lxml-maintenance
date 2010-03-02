@@ -2,6 +2,15 @@
 lxml changelog
 ==============
 
+2.2.6 (2010-03-02)
+==================
+
+Bugs fixed
+----------
+
+* Fixed several Python 3 regressions by building with Cython 0.11.3.
+
+
 2.2.5 (2010-02-28)
 ==================
 
