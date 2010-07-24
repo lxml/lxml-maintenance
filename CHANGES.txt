@@ -2,6 +2,16 @@
 lxml changelog
 ==============
 
+2.2.7 (2010-07-24)
+==================
+
+Bugs fixed
+----------
+
+* Crash in XSLT when generating text-only result documents with a
+  stylesheet created in a different thread.
+
+
 2.2.6 (2010-03-02)
 ==================
 
