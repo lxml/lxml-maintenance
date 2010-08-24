@@ -2,6 +2,16 @@
 lxml changelog
 ==============
 
+2.2.8 (2010-)
+==================
+
+Bugs fixed
+----------
+
+* Crash in newer libxml2 versions when moving elements between
+  documents that had attributes on replaced XInclude nodes.
+
+
 2.2.7 (2010-07-24)
 ==================
 
