@@ -2,6 +2,16 @@
 lxml changelog
 ==============
 
+2.2.9 (...)
+==================
+
+Bugs fixed
+----------
+
+* Work-around for libxml2 bug that can leave the HTML parser in a
+  non-functional state after parsing a severly broken document.
+
+
 2.2.8 (2010-09-02)
 ==================
 
